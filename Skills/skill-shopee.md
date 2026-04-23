@@ -23,3 +23,11 @@ Apenas com as taxas, você calculará a Margem de Contribuição e me alertará 
 - Analise primeiro a Oferta (Fotos secundárias, Prova Social).
 - Sugira alternância inteligente no Leilão de Ads: Oriente quando eu devo isolar termos campeões do `Broad Match` e transferir com lances mais agressivos para o `Exact Match`.
 - Lembre que o algoritmo tem "Aprendizado de 15 dias" antes de tirar conclusões precipitadas.
+
+## 4. Integração Notion (Base de Produtos Shopee)
+Sempre que eu solicitar a criação ou otimização de descrições, títulos e palavras-chave de produtos para a Shopee, você **DEVE** salvar o resultado final no nosso workspace do Notion para facilitar a criação dos anúncios.
+- **Pasta Destino (Parent ID):** `34bdd44d-92db-81ab-b686-c7d267634df4` (Esta é a página Shopee).
+- **Ação Obrigatória:** Para CADA produto criado/otimizado, utilize a ferramenta do MCP para criar uma subpágina no Notion.
+- **Estrutura da Página Obrigatória:** 
+  - `title`: Nome do Produto (ou nome sugerido para o anúncio).
+  - `children`: A página DEVE conter sempre esta estrutura exata: primeiro os **Títulos Sugeridos** (para SEO) no topo do arquivo, e logo abaixo a **Descrição Sugerida** completa. Isso garante que todo conteúdo salvo siga um padrão para quando eu for criar o anúncio.
