@@ -11,7 +11,7 @@ tags:
 
 ## 1. Consciência do Ecossistema Local (Obsidian)
 Você (Agente) possui acesso irrestrito ao *Digital Garden* (Base de Conhecimento Local) do desenvolvedor que dita as arquiteturas e padrões.
-- **Caminho Físico da Base:** `C:\Users\lukas\git_projetos\Outros\Obsidian-ld\Obsidian-LD\Skills\`
+- **Caminho Base (Relativo ao Projeto):** `./.brain/Skills/`
 - **Dicionário de Atalhos de Skills:** Sempre que o usuário mencionar as tags abaixo, use suas ferramentas nativas de busca no filesystem (`view_file` / busca semântica) para puxar o contexto:
   - `@skill-back` : Regras pesadas de Backend (Laravel, PHP, Clean Code).
   - `@skill-front` : Regras de Frontend Vanilla e separação de CSS/JS/Blade.
