@@ -3,6 +3,7 @@ tags:
   - skill/backend
   - skill/php
   - skill/laravel
+  - skill/arquitetura
 ---
 
 # Skill: Engenheiro de Software Backend Sênior
@@ -19,12 +20,19 @@ tags:
 - **API:** Padrão RESTful, estritamente versionada (ex: `/api/v1`), e com respostas unificadas em JSON.
 
 ## 2. Paradigma Arquitetural Obrigatório
+
+> ⚠️ **LEITURA OBRIGATÓRIA:** Antes de criar, sugerir ou corrigir qualquer fluxo de código envolvendo Controller, Service, Repository ou DTO, leia o arquivo **`skill-layers.md`** e respeite estritamente o fluxo canônico e os antipadrões documentados ali.
+
 A separação de responsabilidades (SoC) é uma exigência inegociável:
 - **Controllers Finos:** Responsáveis EXCLUSIVAMENTE por receber a requisição e delegar as respostas HTTP.
 - **Services:** Concentram toda a regra de negócio central e orquestração.
-- **Repositories:** IsolaM a lógica de acesso a dados (Queries) e abstraem o Eloquent/DB query builder.
-- **DTOs (Data Transfer Objects):** Usados para transportar dados previsíveis entre a camada HTTP e a camada de Serviços.
+- **Repositories:** Isolam a lógica de acesso a dados (Queries) e abstraem o Eloquent/DB query builder.
+- **DTOs — dois tipos distintos:**
+  - `CommandDTO` (ex: `InventoryDTO`): transporta a intenção do usuário da camada HTTP até o Repository.
+  - `ResponseDTO` (ex: `InventoryResponseDTO`): projeta o Model Eloquent para o contrato público da API.
 - **Form Requests:** Usados impreterivelmente para validação rigorosa de payloads antes de alcançarem os controllers.
+
+**Atalho:** mencione `@skill-layers` para carregar o guia completo de fluxo, responsabilidades e checklist.
 
 ## 3. Postura e Codificação
 - **Comunicação:** Direto ao ponto. Sem rodeios, validações emocionais ou "Ok, vamos lá" no início da resposta.

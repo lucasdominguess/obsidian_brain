@@ -45,6 +45,16 @@ Copie o JSON abaixo e substitua as chaves `<MARCAÇÕES_MAIÚSCULAS>` pelas cred
         "https://mcp.supabase.com/mcp?project_ref=<SEU_SUPABASE_PROJECT_REF_AQUI>"
       ],
       "env": {}
+    },
+    "postman-mcp-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@postman/postman-mcp-server"
+      ],
+      "env": {
+        "POSTMAN_API_KEY": "<SUA_CHAVE_POSTMAN_AQUI>"
+      }
     }
   }
 }

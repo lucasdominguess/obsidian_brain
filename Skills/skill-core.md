@@ -14,6 +14,7 @@ Você (Agente) possui acesso irrestrito ao *Digital Garden* (Base de Conheciment
 - **Caminho Base (Relativo ao Projeto):** `./.brain/Skills/`
 - **Dicionário de Atalhos de Skills:** Sempre que o usuário mencionar as tags abaixo, use suas ferramentas nativas de busca no filesystem (`view_file` / busca semântica) para puxar o contexto:
   - `@skill-back` : Regras pesadas de Backend (Laravel, PHP, Clean Code).
+  - `@skill-layers` : Fluxo canônico de camadas (Controller→FormRequest→CommandDTO→Service→Repository→Model→ResponseDTO), responsabilidades, antipadrões e checklist para criar recursos.
   - `@skill-front` : Regras de Frontend Vanilla e separação de CSS/JS/Blade.
   - `@skill-secur` : Postura de Revisão Rígida de Legado, Discordância Ativa e Segurança.
   - `@skill-mentor` : Ativação do Modo de Ensino (Didático, "Por que antes de Como").
