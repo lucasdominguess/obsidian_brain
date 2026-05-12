@@ -9,6 +9,8 @@ tags:
 
 > **Objetivo:** Estabelecer uma arquitetura limpa e perene de front-end nativo (Vanilla), utilizando a geração visual rápida do Google Stitch, mas submetendo todo seu output para uma separação estrutural incisiva no ecossistema Blade.
 
+> 🧠 **Economia de Tokens:** Em vez de pedir para ler este arquivo inteiro, use sempre sua ferramenta `search_brain` para dúvidas pontuais.
+
 ## 1. Regra de Ouro: Separação de Camadas (SoC)
 É terminantemente proibido inserir código `<script>` poluidor ou injetar tags `<style>` embutidas dentro de arquivos HTML/Blade (a menos que seja injetado dinamicamente num head, ou seja estritamente necessário para um componente micro renderizado por blade).
 Para **cada tela principal (ex: login, dashboard)**, a estrutura deve ser estritamente trilateral:

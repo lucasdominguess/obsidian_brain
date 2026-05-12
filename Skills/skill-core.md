@@ -23,6 +23,7 @@ Você (Agente) possui acesso irrestrito ao *Digital Garden* (Base de Conheciment
   - `@skill-infra` : DevOps, Docker, CI/CD Render e Setup de Bootstrapping.
   - `@skill-qa` : Protocolo de Testes Automatizados (TDD), Padrão Pest PHP.
   - `@skill-memory` : Retenção de Conhecimento e Geração de ADRs (Architecture Decision Records).
+  - `@skill-planner` : Protocolo de Planejamento Detalhado (Planner-Executor) para tarefas complexas.
 
 ## 2. Consciência de Ferramentas Nativas (Google Stitch MCP)
 Você está conectado a um Servidor MCP que te dá habilidades diretas de Geração de UI/UX com a Engine do Google Stitch.

@@ -9,6 +9,8 @@ tags:
 
 > **Propósito:** Este documento define o contrato arquitetural obrigatório para criação, correção e revisão de qualquer fluxo de código backend. Toda sugestão de código **deve** respeitar este fluxo. Desvios devem ser sinalizados ativamente.
 
+> 🧠 **Economia de Tokens:** Em vez de pedir para ler este arquivo inteiro, use sempre sua ferramenta `search_brain` para dúvidas pontuais sobre `skill-layers` ou leia os exemplos isolados na pasta `Docks/code-snippets/`.
+
 ---
 
 ## 1. O Fluxo Canônico
@@ -68,57 +70,14 @@ JSON Response
 - ❌ **Nunca** contém regras de negócio
 - ❌ **Nunca** chama `auth()` exceto no `fromRequest()` para injetar o usuário autenticado
 
-```php
-// Padrão correto
-readonly class InventoryDTO
-{
-    public function __construct(
-        public ?int $unidade_id = null,
-        // ...
-        public ?int $status_id = null,
-    ) {}
-
-    public static function fromRequest(array $data): self
-    {
-        return new self(
-            unidade_id: $data['unidade_id'] ?? null,
-            // auth() aqui é aceitável
-        );
-    }
-
-    public function toArray(): array
-    {
-        return array_filter([
-            'unidade_id' => $this->unidade_id,
-            // ...
-        ], fn($v) => $v !== null);
-    }
-}
-```
+> 📖 **Exemplo de Código:** Consulte `.brain/Docks/code-snippets/dto-pattern.md` para a implementação detalhada (fromRequest e toArray).
 
 ### Service
 - Orquestra a regra de negócio
 - Recebe `CommandDTO`, entrega `ResponseDTO` (ou coleção/paginação deles)
 - Usa `DB::transaction()` quando há múltiplas escritas dependentes
 
-```php
-// Padrão correto para store()
-public function store(CommandDTO $dto): ResponseDTO
-{
-    // create() já retorna o model com relações carregadas via load() no Repository
-    return ResponseDTO::fromModel($this->repository->create($dto->toArray()));
-}
-
-// Padrão correto para update()
-public function update(Model $model, CommandDTO $dto): ResponseDTO
-{
-    return DB::transaction(function () use ($model, $dto) {
-        // update() já retorna o model com relações carregadas via load() no Repository
-        $updated = $this->repository->update($model, $dto->toArray());
-        return ResponseDTO::fromModel($updated);
-    });
-}
-```
+> 📖 **Exemplo de Código:** Consulte `.brain/Docks/code-snippets/service-pattern.md` para ver como o Service orquestra as transações e converte em ResponseDTO.
 
 ### Repository
 - **Único** responsável por queries e persistência
@@ -128,23 +87,7 @@ public function update(Model $model, CommandDTO $dto): ResponseDTO
 - ❌ **Nunca** instancia DTOs
 - ❌ **Nunca** contém regras de negócio
 
-```php
-public function create(array $data): Model
-{
-    return Model::create($data)->load($this->withRelations());
-}
-
-public function update(Model $model, array $data): Model
-{
-    $model->update($data);
-    return $model->load($this->withRelations());
-}
-
-private function withRelations(): array
-{
-    return ['relacao1', 'relacao2.subrelacao'];
-}
-```
+> 📖 **Exemplo de Código:** Consulte `.brain/Docks/code-snippets/repository-pattern.md` para ver a implementação do `withRelations()` centralizado.
 
 ### ResponseDTO (ex: `InventoryResponseDTO`)
 - Representa o **contrato público da API** — o que o frontend vê
@@ -153,36 +96,7 @@ private function withRelations(): array
 - Protege campos internos: o banco pode ter colunas que não devem ser expostas
 - `toArray()` sem `array_filter` agressivo — campos nullable devem aparecer como `null`, não sumir
 
-```php
-// Padrão correto
-readonly class InventoryResponseDTO
-{
-    public function __construct(
-        public ?int $id = null,
-        public ?array $status = null,
-        // ...
-    ) {}
-
-    public static function fromModel(Model $model): self
-    {
-        return new self(
-            id: $model->id,
-            status: $model->status ? [
-                'id'     => $model->status->id,
-                'status' => $model->status->status,
-            ] : null,
-        );
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'id'     => $this->id,
-            'status' => $this->status,
-        ];
-    }
-}
-```
+> 📖 **Exemplo de Código:** Consulte `.brain/Docks/code-snippets/response-dto-pattern.md` para ver a projeção do Eloquent e formatação.
 
 ---
 

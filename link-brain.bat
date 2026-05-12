@@ -17,3 +17,10 @@ if %errorlevel% neq 0 (
     echo.
     echo ✅ Sucesso! O conhecimento foi mapeado localmente.
 )
+
+echo.
+echo 📦 Instalando dependencias do Servidor MCP...
+cd "%OBSIDIAN_PATH%\mcp-server"
+npm install --strict-ssl=false
+cd "%PROJECT_PATH%"
+echo ✅ Dependencias MCP instaladas.

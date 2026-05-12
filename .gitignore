@@ -5,3 +5,10 @@
 .obsidian/graph.json
 # Ignora cache desnecessário de indexação visual
 .obsidian/cache/
+
+# Ignora dependências do Servidor MCP Local
+mcp-server/node_modules/
+mcp-server/package-lock.json
+
+# Ignora planos temporários gerados pela skill-planner
+Plans/
