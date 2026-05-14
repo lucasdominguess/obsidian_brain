@@ -1,14 +1,22 @@
-# Ignora arquivos de estado visual da máquina local do Obsidian
+# Estado visual local do Obsidian
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
 .obsidian/core-plugins.json
 .obsidian/graph.json
-# Ignora cache desnecessário de indexação visual
 .obsidian/cache/
 
-# Ignora dependências do Servidor MCP Local
+# Dependencias do servidor MCP local
 mcp-server/node_modules/
 mcp-server/package-lock.json
 
-# Ignora planos temporários gerados pela skill-planner
-Plans/
+# Planos temporarios gerados pela skill-planner
+Plans/
+
+# Configuracoes locais geradas pelo bootstrap do Brain
+.env.brain
+brain.local.json
+mcp-config/generated/
+mcp-config/**/*.local.json
+mcp-config/**/*.backup.json
+*.mcp-backup.json
+*.backup.json

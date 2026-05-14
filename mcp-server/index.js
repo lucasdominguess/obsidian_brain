@@ -7,9 +7,13 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const BRAIN_ROOT = path.resolve(__dirname, "../");
-const SKILLS_DIR = path.join(BRAIN_ROOT, "Skills");
-const DOCKS_DIR = path.join(BRAIN_ROOT, "Docks");
+const configuredBrainRoot = process.env.OBSIDIAN_BRAIN_ROOT;
+const BRAIN_ROOT = configuredBrainRoot
+    ? path.resolve(configuredBrainRoot)
+    : path.resolve(__dirname, "../");
+
+const KNOWLEDGE_DIRS = ["Skills", "Docks", "ADRs", "Workflows", "Plans"];
+const TOOL_NAMES = ["brain_status", "list_skills", "read_file", "search_brain"];
 
 // Create the MCP Server
 const server = new McpServer({
@@ -40,21 +44,65 @@ async function findMarkdownFiles(dir) {
     return results;
 }
 
+async function collectBrainFiles() {
+    const groups = await Promise.all(
+        KNOWLEDGE_DIRS.map(async (dirName) => {
+            const dirPath = path.join(BRAIN_ROOT, dirName);
+            const files = await findMarkdownFiles(dirPath);
+            return { dirName, dirPath, files };
+        })
+    );
+
+    return groups;
+}
+
+function formatBrainPath(filePath) {
+    return path.relative(BRAIN_ROOT, filePath).replace(/\\/g, "/");
+}
+
+function resolveBrainPath(filePath) {
+    const fullPath = path.resolve(BRAIN_ROOT, filePath);
+    const isInsideRoot = fullPath === BRAIN_ROOT || fullPath.startsWith(BRAIN_ROOT + path.sep);
+    return { fullPath, isInsideRoot };
+}
+
+// Tool: brain_status
+server.tool(
+    "brain_status",
+    "Show the active Obsidian Brain root, indexed folders, available tools, and readable Markdown files.",
+    {},
+    async () => {
+        const groups = await collectBrainFiles();
+        const lines = [
+            `Brain root: ${BRAIN_ROOT}`,
+            `Root source: ${configuredBrainRoot ? "OBSIDIAN_BRAIN_ROOT" : "mcp-server relative fallback"}`,
+            `Available tools: ${TOOL_NAMES.join(", ")}`,
+            "",
+            "Indexed folders:"
+        ];
+
+        for (const group of groups) {
+            lines.push(`- ${group.dirName}: ${group.files.length} markdown file(s)`);
+        }
+
+        lines.push("", "Readable files:");
+        const files = groups.flatMap((group) => group.files.map(formatBrainPath));
+        lines.push(files.length ? files.join("\n") : "No Markdown files found.");
+
+        return {
+            content: [{ type: "text", text: lines.join("\n") }]
+        };
+    }
+);
+
 // Tool: list_skills
 server.tool(
     "list_skills",
     "List all available skills and documents in the Obsidian Brain",
     {},
     async () => {
-        const skillsFiles = await findMarkdownFiles(SKILLS_DIR);
-        const docksFiles = await findMarkdownFiles(DOCKS_DIR);
-
-        const formatPath = (p) => path.relative(BRAIN_ROOT, p).replace(/\\/g, "/");
-
-        const items = [
-            ...skillsFiles.map(formatPath),
-            ...docksFiles.map(formatPath)
-        ];
+        const groups = await collectBrainFiles();
+        const items = groups.flatMap((group) => group.files.map(formatBrainPath));
 
         return {
             content: [{ type: "text", text: `Available Brain files:\n${items.join("\n")}` }]
@@ -71,9 +119,8 @@ server.tool(
     },
     async ({ filePath }) => {
         try {
-            const fullPath = path.join(BRAIN_ROOT, filePath);
-            // Security check: prevent directory traversal outside BRAIN_ROOT
-            if (!fullPath.startsWith(BRAIN_ROOT)) {
+            const { fullPath, isInsideRoot } = resolveBrainPath(filePath);
+            if (!isInsideRoot) {
                 return {
                     content: [{ type: "text", text: "Error: Invalid path. Access denied." }],
                     isError: true
@@ -102,10 +149,8 @@ server.tool(
     },
     async ({ query }) => {
         try {
-            const allFiles = [
-                ...(await findMarkdownFiles(SKILLS_DIR)),
-                ...(await findMarkdownFiles(DOCKS_DIR))
-            ];
+            const groups = await collectBrainFiles();
+            const allFiles = groups.flatMap((group) => group.files);
 
             const lowerQuery = query.toLowerCase();
             let results = [];
@@ -128,7 +173,7 @@ server.tool(
                 }
 
                 if (matchFound) {
-                    const relPath = path.relative(BRAIN_ROOT, file).replace(/\\/g, "/");
+                    const relPath = formatBrainPath(file);
                     results.push(`### File: ${relPath}\n${excerpts.join("\n\n")}`);
                 }
             }

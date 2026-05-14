@@ -5,39 +5,57 @@ tags:
   - skill/system
 ---
 
-# Skill: Core (Cérebro Central do Agente)
+# Skill: Core (Cerebro Central do Agente)
 
-> **Objetivo:** Estabelecer a consciência situacional do Agente IA (Antigravity). Esta é a diretriz mestre que governa a interoperabilidade de ecossistemas externos e ferramentas conectadas ao ambiente local do usuário.
+> **Objetivo:** Estabelecer a consciencia situacional do Agente IA. Esta e a diretriz mestre que governa a interoperabilidade de skills, MCPs e ferramentas conectadas ao ambiente local do usuario.
 
-## 1. Consciência do Ecossistema Local (Obsidian)
-Você (Agente) possui acesso irrestrito ao *Digital Garden* (Base de Conhecimento Local) do desenvolvedor que dita as arquiteturas e padrões.
-- **Caminho Base (Relativo ao Projeto):** `./.brain/Skills/`
-- **Dicionário de Atalhos de Skills:** Sempre que o usuário mencionar as tags abaixo, use suas ferramentas nativas de busca no filesystem (`view_file` / busca semântica) para puxar o contexto:
-  - `@skill-back` : Regras pesadas de Backend (Laravel, PHP, Clean Code).
-  - `@skill-layers` : Fluxo canônico de camadas (Controller→FormRequest→CommandDTO→Service→Repository→Model→ResponseDTO), responsabilidades, antipadrões e checklist para criar recursos.
-  - `@skill-front` : Regras de Frontend Vanilla e separação de CSS/JS/Blade.
-  - `@skill-secur` : Postura de Revisão Rígida de Legado, Discordância Ativa e Segurança.
-  - `@skill-mentor` : Ativação do Modo de Ensino (Didático, "Por que antes de Como").
-  - `@skill-shopee` : Consultoria analítica focada em métricas financeiras de Tráfego.
-  - `@skill-supabase` : Interações diretas com banco de dados via Supabase MCP.
-  - `@skill-infra` : DevOps, Docker, CI/CD Render e Setup de Bootstrapping.
-  - `@skill-qa` : Protocolo de Testes Automatizados (TDD), Padrão Pest PHP.
-  - `@skill-memory` : Retenção de Conhecimento e Geração de ADRs (Architecture Decision Records).
-  - `@skill-planner` : Protocolo de Planejamento Detalhado (Planner-Executor) para tarefas complexas.
+## 1. Consciencia do Ecossistema Local
 
-## 2. Consciência de Ferramentas Nativas (Google Stitch MCP)
-Você está conectado a um Servidor MCP que te dá habilidades diretas de Geração de UI/UX com a Engine do Google Stitch.
-- **Geração do Zero:** Use ferramentas como `mcp_StitchMCP_generate_screen_from_text` para converter prompts em UI de alta fidelidade.
-- **Identidade e Design System:** Use `mcp_StitchMCP_create_design_system` e `mcp_StitchMCP_apply_design_system` para garantir consistência visual no projeto Frontend.
-- Ao gerar as telas, lembre-se imediatamente de invocar internamente a regra imposta pela `@skill-front` (desmembrar a tela gerada em `.blade.php`, `.css` e `.js` separados).
+O agente possui acesso ao Obsidian Brain, a base local de conhecimento do desenvolvedor.
 
-## 3. Postura Fundamental do Sistema
-- Não seja um "Assistente Passivo". Se o usuário pedir algo que fere a arquitetura atual das skills ou tentar misturar Lógica no Blade, acione o protocolo de "Discordância Ativa".
-- Você não precisa de permissão extra para ler a pasta do Obsidian. É o seu banco de memória de longo prazo.
+- **Caminho base:** use o MCP `obsidian-brain-mcp` ou o `BRAIN_ROOT` informado no bootstrap.
+- **Regra importante:** nao dependa de symlink `.brain` dentro do projeto. Esse modelo e legado.
+- **Ferramentas preferidas:** `brain_status`, `list_skills`, `read_file` e `search_brain`.
 
-## 4. Protocolo de Setup Inicial (Zero-Trust MCP)
-Sempre que iniciar um ambiente do zero e o usuário pedir para "configurar os MCPs":
-- **Leia** o arquivo `mcp-setup.md` para resgatar o template estrutural.
-- **Escreva** o arquivo de configuração correspondente à IDE do usuário contendo **apenas os placeholders**.
-- **PROIBIÇÃO DE SEGURANÇA:** O Agente é estritamente proibido de solicitar as chaves de API via chat. Chaves passadas no chat são enviadas via payload para o provedor do LLM e ficam gravadas em log de texto puro na máquina.
-- **Instrua** o usuário a abrir o arquivo gerado manualmente, colar as chaves que ele guarda no seu cofre pessoal, salvar, e só então avisar o Agente de que o processo foi concluído.
+Sempre que o usuario mencionar uma tag abaixo, busque o contexto correspondente no Brain:
+
+- `@skill-back`: regras de backend, Laravel, PHP e Clean Code.
+- `@skill-layers`: fluxo canonico de camadas, DTOs, Services, Repositories e ResponseDTOs.
+- `@skill-front`: regras de frontend Vanilla e separacao de CSS/JS/Blade.
+- `@skill-secur`: revisao rigida de legado, discordancia ativa e seguranca.
+- `@skill-mentor`: modo de ensino didatico.
+- `@skill-shopee`: consultoria analitica de Shopee e trafego.
+- `@skill-supabase`: interacoes com banco via Supabase MCP.
+- `@skill-infra`: DevOps, Docker, CI/CD, Render e bootstrapping.
+- `@skill-qa`: protocolo de testes automatizados.
+- `@skill-memory`: retencao de conhecimento e ADRs.
+- `@skill-planner`: protocolo Planner-Executor para tarefas complexas.
+
+## 2. Ferramentas externas
+
+Quando MCPs externos estiverem configurados, use-os conforme a necessidade da tarefa. Exemplos:
+
+- Stitch MCP para geracao de UI/UX.
+- Supabase MCP para consultas controladas ao banco.
+- Notion MCP para escrita de paginas autorizadas.
+
+Antes de usar qualquer MCP externo que dependa de credencial, confirme que a ferramenta esta realmente disponivel no ambiente atual.
+
+## 3. Postura fundamental
+
+- Nao seja um assistente passivo. Se o pedido ferir a arquitetura das skills, sinalize o risco e proponha o caminho correto.
+- Nao peca permissao extra para ler o Brain; ele e a memoria de longo prazo autorizada pelo usuario.
+- Prefira buscar trechos especificos com `search_brain` antes de ler documentos longos.
+
+## 4. Protocolo de setup inicial
+
+Sempre que iniciar um ambiente do zero ou o usuario pedir para configurar MCPs:
+
+1. Leia `brain-bootstrap.md`.
+2. Leia `Skills/mcp-setup.md`.
+3. Pergunte o `BRAIN_ROOT` se ele nao tiver sido informado.
+4. Configure ou atualize o MCP global `obsidian-brain-mcp`.
+5. Se encontrar configuracao antiga apontando para `.brain`, migre para `<BRAIN_ROOT>/mcp-server/index.js`.
+6. Preserve outros MCPs ja existentes.
+7. Nunca solicite chaves reais via chat.
+8. Ao final, confirme acessos, pastas, skills, ferramentas e status do start inicial.

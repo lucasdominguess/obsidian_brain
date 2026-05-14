@@ -70,14 +70,14 @@ JSON Response
 - ❌ **Nunca** contém regras de negócio
 - ❌ **Nunca** chama `auth()` exceto no `fromRequest()` para injetar o usuário autenticado
 
-> 📖 **Exemplo de Código:** Consulte `.brain/Docks/code-snippets/dto-pattern.md` para a implementação detalhada (fromRequest e toArray).
+> 📖 **Exemplo de Código:** Consulte `Docks/code-snippets/dto-pattern.md` para a implementação detalhada (fromRequest e toArray).
 
 ### Service
 - Orquestra a regra de negócio
 - Recebe `CommandDTO`, entrega `ResponseDTO` (ou coleção/paginação deles)
 - Usa `DB::transaction()` quando há múltiplas escritas dependentes
 
-> 📖 **Exemplo de Código:** Consulte `.brain/Docks/code-snippets/service-pattern.md` para ver como o Service orquestra as transações e converte em ResponseDTO.
+> 📖 **Exemplo de Código:** Consulte `Docks/code-snippets/service-pattern.md` para ver como o Service orquestra as transações e converte em ResponseDTO.
 
 ### Repository
 - **Único** responsável por queries e persistência
@@ -87,7 +87,7 @@ JSON Response
 - ❌ **Nunca** instancia DTOs
 - ❌ **Nunca** contém regras de negócio
 
-> 📖 **Exemplo de Código:** Consulte `.brain/Docks/code-snippets/repository-pattern.md` para ver a implementação do `withRelations()` centralizado.
+> 📖 **Exemplo de Código:** Consulte `Docks/code-snippets/repository-pattern.md` para ver a implementação do `withRelations()` centralizado.
 
 ### ResponseDTO (ex: `InventoryResponseDTO`)
 - Representa o **contrato público da API** — o que o frontend vê
@@ -96,7 +96,7 @@ JSON Response
 - Protege campos internos: o banco pode ter colunas que não devem ser expostas
 - `toArray()` sem `array_filter` agressivo — campos nullable devem aparecer como `null`, não sumir
 
-> 📖 **Exemplo de Código:** Consulte `.brain/Docks/code-snippets/response-dto-pattern.md` para ver a projeção do Eloquent e formatação.
+> 📖 **Exemplo de Código:** Consulte `Docks/code-snippets/response-dto-pattern.md` para ver a projeção do Eloquent e formatação.
 
 ---
 

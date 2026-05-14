@@ -1,42 +1,144 @@
-# Setup Automático do Ambiente (Para a Inteligência Artificial ler)
+# Setup automatico do ambiente para agentes
 
-> **Instrução para a IA:** Se você (o Agente/IA) foi solicitado a ler este arquivo para configurar o ambiente em uma nova máquina, siga os passos abaixo rigorosamente.
+Este arquivo deve ser lido pelo agente/IA quando o usuario pedir para configurar o Obsidian Brain em uma IDE nova ou atualizar uma configuracao antiga.
 
-## Passo 1: Inicializar o Servidor MCP Local
+## Entrada obrigatoria
 
-Temos um servidor MCP em Node.js (na pasta `mcp-server`) que atua como o indexador e "bibliotecário" desta base de conhecimento. Ele economiza tokens nas suas próprias requisições!
+O agente precisa saber o caminho absoluto da pasta clonada do Brain.
 
-1. Acesse a pasta do servidor: `cd mcp-server`
-2. Instale as dependências ignorando SSL (útil para redes corporativas): `npm install --strict-ssl=false`
+Nome padrao desse caminho:
 
-## Passo 2: Configurar o MCP na sua própria IDE/Agent
+```text
+BRAIN_ROOT
+```
 
-Para que você (IA) consiga usar as ferramentas `search_brain`, `list_skills` e `read_file`, você precisa se registrar para escutar o MCP local.
-Verifique em qual IDE/Agente você está rodando no momento e adicione o seguinte servidor à sua configuração:
+Se o usuario nao informou o caminho, pergunte apenas:
 
-**Nome do Servidor:** `obsidian-brain-mcp`
-**Comando:** `node`
-**Argumentos:** `["<CAMINHO_ABSOLUTO_DESTE_REPO>/mcp-server/index.js"]`
+```text
+Qual e o caminho absoluto da pasta onde voce clonou o Obsidian Brain?
+```
 
-**Exemplo Prático (Se você for o Antigravity):**
-Você tem permissão para editar o arquivo `mcp_config.json` (Geralmente em `~/.gemini/antigravity/mcp_config.json`). Adicione o seguinte nó dentro de `"mcpServers"`:
+## Passo 1: validar a pasta do Brain
+
+Confirme que existem:
+
+- `<BRAIN_ROOT>/brain-bootstrap.md`
+- `<BRAIN_ROOT>/mcp-server/index.js`
+- `<BRAIN_ROOT>/Skills`
+- `<BRAIN_ROOT>/Docks`
+
+Se algum item obrigatorio nao existir, pare e informe exatamente o item ausente.
+
+## Passo 2: instalar dependencias do MCP local
+
+No diretorio:
+
+```text
+<BRAIN_ROOT>/mcp-server
+```
+
+Execute:
+
+```bash
+npm install --strict-ssl=false
+```
+
+Se `node_modules` ja existir, valide pelo menos o script:
+
+```bash
+npm run check
+```
+
+## Passo 3: configurar o MCP global da IDE/agente
+
+Registre ou atualize o servidor:
 
 ```json
-"obsidian-brain-mcp": {
-  "command": "node",
-  "args": ["<CAMINHO_ABSOLUTO_DA_PASTA_OBSIDIAN_BRAIN>/mcp-server/index.js"],
-  "env": {},
-  "$typeName": "exa.cascade_plugins_pb.CascadePluginCommandTemplate"
+{
+  "mcpServers": {
+    "obsidian-brain-mcp": {
+      "command": "node",
+      "args": [
+        "<BRAIN_ROOT>/mcp-server/index.js"
+      ],
+      "env": {
+        "OBSIDIAN_BRAIN_ROOT": "<BRAIN_ROOT>"
+      }
+    }
+  }
 }
 ```
-*(Certifique-se de substituir o `<CAMINHO_ABSOLUTO>` pelo caminho real do repositório onde este arquivo está).*
 
-## Passo 3: Criação de Symlink nos Projetos
+No Antigravity, inclua dentro do servidor:
 
-Recomende ao usuário que ele use o script `link-brain.bat` na raiz de qualquer projeto novo que ele iniciar. Isso fará com que a pasta `.brain` apareça no projeto apontando para cá.
+```json
+"$typeName": "exa.cascade_plugins_pb.CascadePluginCommandTemplate"
+```
 
-## Melhorias Adicionais de Governança (Sugestões ao Usuário)
+Antes de gravar qualquer arquivo JSON existente, crie um backup.
 
-1. **Vault de Segredos Separado:** Nunca armazene as chaves de API (Notion, Google, Supabase) puras no repositório do Obsidian. Deixe-as em um gerenciador de senhas (Bitwarden) e instrua a IA a pedir as chaves na hora do setup.
-2. **Uso de `.env.brain`:** Em vez de editar configurações globais da IDE manualmente, use um script `.bat` ou `.sh` que injeta dinamicamente o arquivo `mcp_config.json` lendo de um template.
-3. **Atualização do .gitignore:** A IA que fizer o setup deve confirmar se o `.gitignore` do projeto atual contém `/.brain/` e `/mcp-server/node_modules/`.
+## Passo 4: tratar configuracao legada
+
+Se a configuracao atual ja tiver `obsidian-brain-mcp`, verifique os parametros.
+
+Considere legado quando:
+
+- `args` aponta para `.brain/mcp-server/index.js`.
+- `args` aponta para uma pasta dentro de um projeto especifico, como SISDTIC ou SGOPM.
+- o servidor nao possui `env.OBSIDIAN_BRAIN_ROOT`.
+
+Nesse caso, substitua apenas o bloco `obsidian-brain-mcp` pelo modelo global com `<BRAIN_ROOT>`. Preserve os outros MCPs ja configurados.
+
+O symlink `.brain` dentro de projetos antigos nao precisa ser removido. Ele apenas deixa de ser necessario para o start inicial.
+
+## Passo 5: alternativa automatica
+
+Se puder executar Node no repositorio do Brain e ja existir um arquivo MCP conhecido, use:
+
+```bash
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent auto
+```
+
+Para setup do zero, escolha o agente explicitamente:
+
+```bash
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent antigravity
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent claude-desktop
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cline-roo
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor
+```
+
+Se a IDE nao permitir escrita fora do workspace, gere o JSON:
+
+```bash
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor --print
+```
+
+Depois entregue o JSON para o usuario colar manualmente.
+
+## Passo 6: validar acesso ao Brain
+
+Depois que a IDE/agente carregar o MCP, valide:
+
+1. Execute `brain_status`.
+2. Execute `list_skills`.
+3. Execute `read_file` em `Skills/skill-planner.md`.
+4. Execute `search_brain` buscando por `MCP`.
+
+Se o MCP so ficar disponivel apos reinicio, avise o usuario para reiniciar a IDE/agente e repetir a validacao.
+
+## Confirmacao obrigatoria ao usuario
+
+Ao final, responda com:
+
+- `BRAIN_ROOT` usado.
+- Caminho do arquivo MCP alterado, ou informe que o modo manual foi necessario.
+- Se uma configuracao legada com `.brain` foi encontrada e atualizada.
+- Pastas acessiveis: `Skills`, `Docks`, `ADRs`, `Workflows`, `Plans`, quando existirem.
+- Skills encontradas.
+- Ferramentas MCP disponiveis: `brain_status`, `list_skills`, `read_file`, `search_brain`.
+- Status final: sucesso, sucesso aguardando reinicio, ou erro com o proximo passo exato.
+
+## Seguranca
+
+Nunca grave chaves reais no repositorio do Brain. Use placeholders nos templates e deixe tokens reais apenas no arquivo local da IDE/agente ou em um cofre de senhas.

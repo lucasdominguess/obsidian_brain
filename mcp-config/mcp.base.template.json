@@ -1,0 +1,53 @@
+{
+  "mcpServers": {
+    "obsidian-brain-mcp": {
+      "command": "node",
+      "args": [
+        "<BRAIN_ROOT>/mcp-server/index.js"
+      ],
+      "env": {
+        "OBSIDIAN_BRAIN_ROOT": "<BRAIN_ROOT>"
+      }
+    },
+    "StitchMCP": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://stitch.googleapis.com/mcp",
+        "--header",
+        "X-Goog-Api-Key: <SEU_GOOGLE_API_KEY_AQUI>"
+      ],
+      "env": {}
+    },
+    "notion-mcp-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@notionhq/notion-mcp-server"
+      ],
+      "env": {
+        "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer <SUA_CHAVE_DO_NOTION_AQUI>\", \"Notion-Version\": \"2022-06-28\"}"
+      }
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.supabase.com/mcp?project_ref=<SEU_SUPABASE_PROJECT_REF_AQUI>"
+      ],
+      "env": {}
+    },
+    "postman-mcp-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@postman/postman-mcp-server"
+      ],
+      "env": {
+        "POSTMAN_API_KEY": "<SUA_CHAVE_POSTMAN_AQUI>"
+      }
+    }
+  }
+}

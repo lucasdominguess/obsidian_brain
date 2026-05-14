@@ -5,37 +5,53 @@ tags:
   - skill/documentation
 ---
 
-# Skill: Gestão de Memória Arquitetural (ADRs)
+# Skill: Gestao de Memoria Arquitetural (ADRs)
 
-> **Objetivo:** Evitar a perda de contexto técnico com o passar do tempo e da rotação de chats. O Agente IA usará esta skill para consolidar decisões difíceis em registros perpétuos (ADRs).
+> **Objetivo:** Evitar a perda de contexto tecnico com o passar do tempo e da rotacao de chats. O agente usara esta skill para consolidar decisoes importantes em registros duraveis.
 
-## 1. O que é um ADR?
-Architecture Decision Record (Registro de Decisão Arquitetural) é um documento curto criado na hora que o time (ou você e o Agente) resolve um problema crônico ou estabelece um novo padrão que afeta múltiplos arquivos.
+## 1. O que e um ADR?
 
-## 2. O Gatilho de Automação
-Sempre que uma das seguintes situações ocorrer, o Agente proporá (ou o usuário ordenará via `@skill-memory`) a criação de um ADR:
-- Mudança brusca de stack (Ex: Trocar o banco de sessões de Database para Cookie).
-- Descoberta de um bug de versão crítico superado após muito *troubleshooting* (Ex: Conflito do PHP 8.3 com o `mb_convert_encoding`).
-- Introdução de uma nova biblioteca base (Ex: Adoção do Pest no lugar do PHPUnit).
+Architecture Decision Record e um documento curto criado quando o time ou o agente resolve um problema cronico ou estabelece um padrao que afeta multiplos arquivos.
 
-## 3. O Padrão do Documento (Onde e Como salvar)
-A IA deve criar um arquivo numerado na pasta `.brain/ADRs/`, como `0001-nome-da-decisao.md`.
+## 2. Gatilhos de automacao
 
-**Template Obrigatório de ADR:**
+Sempre que uma das situacoes abaixo ocorrer, o agente deve propor ou criar um ADR:
+
+- Mudanca brusca de stack.
+- Descoberta de bug critico de versao depois de troubleshooting.
+- Introducao de nova biblioteca base.
+- Decisao que afeta multiplos projetos, agentes ou workflows.
+- Mudanca no protocolo de start inicial do Brain ou MCP.
+
+## 3. Onde salvar
+
+A IA deve criar um arquivo numerado na pasta `ADRs/` do Obsidian Brain, usando o MCP ou o `BRAIN_ROOT` configurado.
+
+Exemplo:
+
+```text
+ADRs/0001-nome-da-decisao.md
+```
+
+Nao use `.brain/ADRs/` como caminho principal. Esse formato pertence ao fluxo legado com symlink.
+
+## 4. Template obrigatorio
+
 ```markdown
-# ADR [00X]: Título da Decisão
+# ADR [00X]: Titulo da Decisao
 **Data:** AAAA-MM-DD
 **Status:** Aceito / Proposto / Descontinuado
 
 ## 1. O Contexto e o Problema
-Descreva rapidamente o erro, limite tecnológico ou gargalo de arquitetura que exigiu intervenção.
+Descreva rapidamente o erro, limite tecnologico ou gargalo de arquitetura que exigiu intervencao.
 
-## 2. A Decisão
-Qual foi a solução técnica adotada e por que ela venceu outras alternativas?
+## 2. A Decisao
+Qual foi a solucao tecnica adotada e por que ela venceu outras alternativas?
 
-## 3. As Consequências (Trade-offs)
-Impacto positivo (o que ganhamos) e negativo (o que perdemos/dívida técnica aceita).
+## 3. As Consequencias (Trade-offs)
+Impacto positivo e negativo da decisao.
 ```
 
-## 4. Retenção Ativa
-Antes de o Agente sugerir desfazer um padrão estabelecido do projeto ou tentar reverter um código exótico que parece "fora do lugar", ele deve realizar uma busca nos arquivos ADR para verificar se aquele código "feio" não foi uma decisão arquitetural documentada previamente por uma restrição do sistema.
+## 5. Retencao ativa
+
+Antes de sugerir desfazer um padrao estabelecido ou reverter codigo que parece fora do lugar, o agente deve buscar nos ADRs para verificar se aquilo foi uma decisao arquitetural documentada.

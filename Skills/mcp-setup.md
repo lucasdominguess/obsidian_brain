@@ -4,87 +4,132 @@ tags:
   - infra/config
 ---
 
-# Configuração Padrão de MCPs (Model Context Protocol)
+# Configuracao padrao de MCPs
 
-Este documento centraliza as integrações de ferramentas de IA (MCPs) do seu fluxo de desenvolvimento. Quando você migrar de IDE (Cursor, VSCode), formatar a máquina ou instanciar um novo Agente, basta usar a estrutura JSON abaixo para restaurar todos os "poderes" da IA.
+Esta skill centraliza o modelo de MCPs usado pelos agentes. O servidor obrigatorio e o `obsidian-brain-mcp`, que da acesso ao Brain global sem depender de symlink `.brain` dentro dos projetos.
 
-## 1. O Template JSON Universal
+## 1. Contrato atual
 
-Copie o JSON abaixo e substitua as chaves `<MARCAÇÕES_MAIÚSCULAS>` pelas credenciais reais. 
-**Regra de Ouro:** Suas chaves de API nunca devem ser coladas aqui no Obsidian por segurança. Mantenha os *placeholders*.
+O agente deve receber ou perguntar o caminho absoluto do clone do Brain:
+
+```text
+BRAIN_ROOT
+```
+
+Todo agente/IDE deve registrar:
 
 ```json
 {
   "mcpServers": {
-    "StitchMCP": {
-      "command": "npx",
+    "obsidian-brain-mcp": {
+      "command": "node",
       "args": [
-        "-y",
-        "mcp-remote",
-        "https://stitch.googleapis.com/mcp",
-        "--header",
-        "X-Goog-Api-Key: <SEU_GOOGLE_API_KEY_AQUI>"
-      ],
-      "env": {}
-    },
-    "notion-mcp-server": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@notionhq/notion-mcp-server"
+        "<BRAIN_ROOT>/mcp-server/index.js"
       ],
       "env": {
-        "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer <SUA_CHAVE_DO_NOTION_AQUI>\", \"Notion-Version\": \"2022-06-28\"}"
-      }
-    },
-    "supabase": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp.supabase.com/mcp?project_ref=<SEU_SUPABASE_PROJECT_REF_AQUI>"
-      ],
-      "env": {}
-    },
-    "postman-mcp-server": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@postman/postman-mcp-server"
-      ],
-      "env": {
-        "POSTMAN_API_KEY": "<SUA_CHAVE_POSTMAN_AQUI>"
+        "OBSIDIAN_BRAIN_ROOT": "<BRAIN_ROOT>"
       }
     }
   }
 }
 ```
 
-## 2. Onde configurar em cada Ecossistema?
+No Antigravity, adicione tambem:
 
-Cada IDE/Agente mapeia a leitura dos servidores MCP em um local diferente. Se guie pelo mapeamento abaixo:
+```json
+"$typeName": "exa.cascade_plugins_pb.CascadePluginCommandTemplate"
+```
 
-- **Cursor IDE**
-  - **Onde:** Na IDE, acesse `Settings > Features > MCP` e adicione manualmente.
-  - **Como:** Em "Type", escolha `command`. Preencha com `npx` e cole os `args` do template um a um.
+## 2. Templates versionados
 
-- **Claude Desktop (Windows)**
-  - **Onde:** Abra o arquivo `%APPDATA%\Claude\claude_desktop_config.json`
-  - **Como:** Cole o bloco JSON integral (com suas chaves preenchidas) dentro do nó pai.
+Use estes arquivos como fonte:
 
-- **Cline / Roo / Cline (VS Code Extension)**
-  - **Onde:** Abra o arquivo `%APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json`
-  - **Como:** O arquivo aceita o JSON bruto exatamente no formato do template 1.
+- `mcp-config/mcp.base.template.json`
+- `mcp-config/agents/antigravity.template.json`
+- `mcp-config/agents/claude-desktop.template.json`
+- `mcp-config/agents/cline-roo.template.json`
+- `mcp-config/agents/cursor.template.json`
 
-- **Antigravity (Aplicações Google AI)**
-  - **Onde:** Abra o arquivo `C:\Users\<SeuUsuario>\.gemini\antigravity\mcp_config.json`
-  - **Como:** *Atenção especial!* Essa engine requer a injeção do schema de tipagem nativa. Ao lado de cada chave `"command"`, adicione obrigatoriamente a linha:
-    `"$typeName": "exa.cascade_plugins_pb.CascadePluginCommandTemplate",`
+O template base tambem documenta MCPs externos com placeholders:
 
-## 3. Sugestão de Governança (SecOps)
+- `StitchMCP`
+- `notion-mcp-server`
+- `supabase`
+- `postman-mcp-server`
 
-Dado o seu interesse em construir uma máquina bem azeitada e reutilizável, aconselho a seguinte gestão de segredos (Secrets Management):
+Credenciais reais nunca devem ser gravadas no repositorio. Elas pertencem ao arquivo local da IDE/agente ou a um cofre de senhas.
 
-1. **Vault Mestre:** Crie uma anotação trancada ou cofre de senhas (no Bitwarden, 1Password, ou no chaveiro nativo do Windows/Mac) batizado como "Master MCP Keys". 
-2. **Atualização Centralizada:** Sempre que nós (IA) ou você adicionarmos uma nova Skill conectada, documentamos o *esqueleto (placeholders)* aqui neste arquivo Markdown, e você leva o *secret real* apenas para o seu cofre Master e para o arquivo `.json` escondido da IDE atual.
-3. Isso garante que seu repositório de Obsidian não tenha credenciais expostas que seriam fatalmente sincronizadas para nuvens não-confiáveis (em eventuais plugins de Sync) ou lidas acidentalmente.
+## 3. Inicializador opcional
+
+Quando puder executar Node no repositorio do Brain:
+
+```bash
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent auto
+```
+
+Agentes conhecidos:
+
+```bash
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent antigravity
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent claude-desktop
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cline-roo
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor
+```
+
+Para gerar JSON sem gravar:
+
+```bash
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor --print
+```
+
+## 4. Onde configurar em cada ecossistema
+
+- Cursor:
+  - Global: `C:\Users\<SeuUsuario>\.cursor\mcp.json`
+  - Projeto: `.cursor/mcp.json`
+  - Prefira o global para manter o Brain disponivel em qualquer projeto.
+
+- Claude Desktop no Windows:
+  - `%APPDATA%\Claude\claude_desktop_config.json`
+
+- Cline/Roo no VS Code:
+  - `%APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json`
+
+- Antigravity:
+  - `C:\Users\<SeuUsuario>\.gemini\antigravity\mcp_config.json`
+  - Exige `$typeName` no bloco do servidor.
+
+## 5. Migracao de agente legado
+
+Se o start antigo ja foi feito por symlink, o agente pode encontrar algo como:
+
+```json
+"args": [
+  ".brain/mcp-server/index.js"
+]
+```
+
+ou um caminho absoluto dentro de um projeto especifico.
+
+Nesse caso:
+
+1. Faca backup do JSON antes de editar.
+2. Substitua apenas o servidor `obsidian-brain-mcp`.
+3. Use `<BRAIN_ROOT>/mcp-server/index.js`.
+4. Adicione `env.OBSIDIAN_BRAIN_ROOT`.
+5. Preserve todos os outros MCPs existentes.
+6. Reinicie a IDE/agente se necessario.
+
+O symlink `.brain` pode continuar existindo em projetos antigos, mas nao deve mais ser a fonte principal do Brain.
+
+## 6. Validacao obrigatoria
+
+Depois da configuracao ou migracao, o agente deve confirmar:
+
+- `BRAIN_ROOT` usado.
+- Arquivo MCP atualizado ou JSON entregue para configuracao manual.
+- Se encontrou e corrigiu configuracao legada com `.brain`.
+- Pastas lidas: `Skills`, `Docks`, `ADRs`, `Workflows`, `Plans`, quando existirem.
+- Skills encontradas por `list_skills`.
+- Ferramentas disponiveis: `brain_status`, `list_skills`, `read_file`, `search_brain`.
+- Resultado final: sucesso, sucesso aguardando reinicio, ou erro com proximo passo.

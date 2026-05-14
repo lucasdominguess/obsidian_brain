@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "obsidian-brain-mcp": {
+      "command": "node",
+      "args": [
+        "<BRAIN_ROOT>/mcp-server/index.js"
+      ],
+      "env": {
+        "OBSIDIAN_BRAIN_ROOT": "<BRAIN_ROOT>"
+      }
+    }
+  }
+}
