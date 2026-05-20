@@ -14,7 +14,6 @@ tags:
 O agente possui acesso ao Obsidian Brain, a base local de conhecimento do desenvolvedor.
 
 - **Caminho base:** use o MCP `obsidian-brain-mcp` ou o `BRAIN_ROOT` informado no bootstrap.
-- **Regra importante:** nao dependa de symlink `.brain` dentro do projeto. Esse modelo e legado.
 - **Ferramentas preferidas:** `brain_status`, `list_skills`, `read_file` e `search_brain`.
 
 Sempre que o usuario mencionar uma tag abaixo, busque o contexto correspondente no Brain:
@@ -30,6 +29,7 @@ Sempre que o usuario mencionar uma tag abaixo, busque o contexto correspondente 
 - `@skill-qa`: protocolo de testes automatizados.
 - `@skill-memory`: retencao de conhecimento e ADRs.
 - `@skill-planner`: protocolo Planner-Executor para tarefas complexas.
+- `@skill-swagger-docs`: criacao e revisao de documentacao Swagger/OpenAPI/L5-Swagger baseada em rotas, requests, controllers, DTOs, models e padroes existentes do projeto.
 
 ## 2. Ferramentas externas
 
@@ -55,7 +55,6 @@ Sempre que iniciar um ambiente do zero ou o usuario pedir para configurar MCPs:
 2. Leia `Skills/mcp-setup.md`.
 3. Pergunte o `BRAIN_ROOT` se ele nao tiver sido informado.
 4. Configure ou atualize o MCP global `obsidian-brain-mcp`.
-5. Se encontrar configuracao antiga apontando para `.brain`, migre para `<BRAIN_ROOT>/mcp-server/index.js`.
-6. Preserve outros MCPs ja existentes.
-7. Nunca solicite chaves reais via chat.
-8. Ao final, confirme acessos, pastas, skills, ferramentas e status do start inicial.
+5. Preserve outros MCPs ja existentes.
+6. Nunca solicite chaves reais via chat.
+7. Ao final, confirme acessos, pastas, skills, ferramentas e status do start inicial.

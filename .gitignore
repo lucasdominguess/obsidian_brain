@@ -9,8 +9,7 @@
 mcp-server/node_modules/
 mcp-server/package-lock.json
 
-# Planos temporarios gerados pela skill-planner
-Plans/
+
 
 # Configuracoes locais geradas pelo bootstrap do Brain
 .env.brain
@@ -20,3 +19,8 @@ mcp-config/**/*.local.json
 mcp-config/**/*.backup.json
 *.mcp-backup.json
 *.backup.json
+
+# Artefatos do plugin Cowork (versiona-se o source em plugin/obsidian-brain/, nao o pacote)
+plugin/**/*.plugin
+plugin/**/*.zip
+plugin/**/node_modules/

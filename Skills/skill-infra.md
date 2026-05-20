@@ -20,7 +20,7 @@ Sempre que o Agente iniciar o desenvolvimento em um projeto "fresco", ele deve s
 O ecossistema oficial de deploy é focado em containers (Docker) hospedados no Render:
 - **Dockerfile Multi-stage:** A compilação sempre deve ser dividida em passos lógicos: dependências (Composer/Node) -> Build (Vite) -> Runtime (PHP-FPM/Alpine).
 - **Sem persistência no container:** Os containers são *stateless* e *ephemeral*. Drivers locais como `SESSION_DRIVER=file` não devem ser usados em produção a longo prazo (ideal: `cookie` ou `redis` ou `database`).
-- **Nginx e PHP-FPM:** O Agente deve saber debugar arquivos de conf (`nginx.conf`, `php.ini` otimizado para produção) e usar logs do Render em caso de erro 500 sem corpo (fatal errors).
+- **Nginx e PHP-FPM:** Em erro 500 sem corpo, debugar `nginx.conf`, `php.ini` e logs do Render.
 
 ## 3. Gestão de Variáveis de Ambiente
 - Toda variável nova incluída no código (`env('NOVA_API_KEY')`) deve **obrigatoriamente** ser adicionada ao `.env.example` pela IA, para que o setup do projeto não quebre no futuro.

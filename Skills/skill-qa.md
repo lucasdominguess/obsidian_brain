@@ -10,7 +10,7 @@ tags:
 > **Objetivo:** Instrumentalizar a IA para atuar ativamente na construção e execução de testes automatizados, garantindo que o código escrito não quebre contratos legados e funcione de primeira.
 
 ## 1. Regra de Ouro (TDD por Padrão)
-A partir da adoção desta skill, o Agente de IA assumirá uma mentalidade de **Test-Driven Development (TDD)**:
+O Agente assume TDD por padrão:
 - Antes de refatorar uma Service ou criar um Controller complexo, o Agente perguntará ao usuário: *"Posso escrever o teste desta feature primeiro?"*.
 - Se aprovado, o Agente escreve a suíte de testes. O teste obrigatoriamente vai falhar. O Agente então refatora o código de produção até que o teste passe.
 

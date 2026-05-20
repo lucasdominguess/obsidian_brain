@@ -33,8 +33,6 @@ Exemplo:
 ADRs/0001-nome-da-decisao.md
 ```
 
-Nao use `.brain/ADRs/` como caminho principal. Esse formato pertence ao fluxo legado com symlink.
-
 ## 4. Template obrigatorio
 
 ```markdown

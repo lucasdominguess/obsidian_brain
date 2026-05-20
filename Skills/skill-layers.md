@@ -9,8 +9,6 @@ tags:
 
 > **Propósito:** Este documento define o contrato arquitetural obrigatório para criação, correção e revisão de qualquer fluxo de código backend. Toda sugestão de código **deve** respeitar este fluxo. Desvios devem ser sinalizados ativamente.
 
-> 🧠 **Economia de Tokens:** Em vez de pedir para ler este arquivo inteiro, use sempre sua ferramenta `search_brain` para dúvidas pontuais sobre `skill-layers` ou leia os exemplos isolados na pasta `Docks/code-snippets/`.
-
 ---
 
 ## 1. O Fluxo Canônico

@@ -14,7 +14,7 @@ tags:
 - **Backend:** PHP 8.2+, Laravel 11+ (Framework principal), Slim 4 (Micro-framework).
 - **Banco de Dados:** MariaDB/PostgreSQL.
 - **Cache & Filas:** Redis.
-- **Frontend:** JavaScript Vanilla, HTML, CSS (Sem frameworks grandes por padrão).
+- **Frontend:** ver `skill-front.md`.
 - **Infraestrutura:** Linux (produção/systemd/crontab), Docker (ambientes conteinerizados), Windows (ambiente de dev local), PaaS (Render), DBaaS (Supabase).
 - **Testes:** PHPUnit / Pest.
 - **API:** Padrão RESTful, estritamente versionada (ex: `/api/v1`), e com respostas unificadas em JSON.
@@ -26,8 +26,6 @@ tags:
 A separação de responsabilidades (SoC) é uma exigência inegociável (Controllers Finos, Services, Repositories, DTOs e Form Requests).
 Detalhes minuciosos de implementação dessas camadas não vivem neste arquivo.
 
-> 🧠 **Economia de Tokens:** Em vez de pedir para ler o arquivo inteiro, use sempre sua ferramenta `search_brain` para dúvidas pontuais sobre `skill-layers` ou leia os exemplos isolados na pasta `Docks/code-snippets/`.
-
 ## 3. Postura e Codificação
 - **Comunicação:** Direto ao ponto. Sem rodeios, validações emocionais ou "Ok, vamos lá" no início da resposta.
 - **Idioma do Código:** Código fonte, variáveis, classes, e arquitetura ALWAYS em Inglês.
@@ -36,5 +34,5 @@ Detalhes minuciosos de implementação dessas camadas não vivem neste arquivo.
 
 ## 4. Performance & Testabilidade
 - **Banco de Dados:** Otimize sempre. Alerte para problemas de "N+1" e use Eager Loading sistematicamente. Faça bom uso de índices.
-- **Cache Múltiplo:** Onde houver operações lentas reincidentes, sugira estratégias de cache via Redis justificando os tempos de vida (TTL).
-- **Testes por Padrão:** Injete dependências (Inversion of Control). Evite acoplamento forte `(Classe::metodoEstatico)` quando prever testes de serviço (mockability).
+- **Cache Múltiplo:** Onde houver operações lentas reincidentes, sugira estratégias de cache via Redis com TTL justificado.
+- **Testes por Padrão:** Injete dependências (Inversion of Control). Evite acoplamento forte `(Classe::metodoEstatico)` quando prever testes unitários.

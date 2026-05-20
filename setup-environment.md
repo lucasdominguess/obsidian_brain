@@ -77,21 +77,7 @@ No Antigravity, inclua dentro do servidor:
 
 Antes de gravar qualquer arquivo JSON existente, crie um backup.
 
-## Passo 4: tratar configuracao legada
-
-Se a configuracao atual ja tiver `obsidian-brain-mcp`, verifique os parametros.
-
-Considere legado quando:
-
-- `args` aponta para `.brain/mcp-server/index.js`.
-- `args` aponta para uma pasta dentro de um projeto especifico, como SISDTIC ou SGOPM.
-- o servidor nao possui `env.OBSIDIAN_BRAIN_ROOT`.
-
-Nesse caso, substitua apenas o bloco `obsidian-brain-mcp` pelo modelo global com `<BRAIN_ROOT>`. Preserve os outros MCPs ja configurados.
-
-O symlink `.brain` dentro de projetos antigos nao precisa ser removido. Ele apenas deixa de ser necessario para o start inicial.
-
-## Passo 5: alternativa automatica
+## Passo 4: alternativa automatica
 
 Se puder executar Node no repositorio do Brain e ja existir um arquivo MCP conhecido, use:
 
@@ -102,10 +88,11 @@ node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent auto
 Para setup do zero, escolha o agente explicitamente:
 
 ```bash
-node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent antigravity
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent claude-code
 node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent claude-desktop
-node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cline-roo
 node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cline-roo
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent antigravity
 ```
 
 Se a IDE nao permitir escrita fora do workspace, gere o JSON:
@@ -116,7 +103,7 @@ node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor --print
 
 Depois entregue o JSON para o usuario colar manualmente.
 
-## Passo 6: validar acesso ao Brain
+## Passo 5: validar acesso ao Brain
 
 Depois que a IDE/agente carregar o MCP, valide:
 
@@ -133,7 +120,6 @@ Ao final, responda com:
 
 - `BRAIN_ROOT` usado.
 - Caminho do arquivo MCP alterado, ou informe que o modo manual foi necessario.
-- Se uma configuracao legada com `.brain` foi encontrada e atualizada.
 - Pastas acessiveis: `Skills`, `Docks`, `ADRs`, `Workflows`, `Plans`, quando existirem.
 - Skills encontradas.
 - Ferramentas MCP disponiveis: `brain_status`, `list_skills`, `read_file`, `search_brain`.
