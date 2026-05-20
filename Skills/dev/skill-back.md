@@ -14,14 +14,14 @@ tags:
 - **Backend:** PHP 8.2+, Laravel 11+ (Framework principal), Slim 4 (Micro-framework).
 - **Banco de Dados:** MariaDB/PostgreSQL.
 - **Cache & Filas:** Redis.
-- **Frontend:** ver `skill-front.md`.
+- **Frontend:** ver `Skills/dev/skill-front.md`.
 - **Infraestrutura:** Linux (produção/systemd/crontab), Docker (ambientes conteinerizados), Windows (ambiente de dev local), PaaS (Render), DBaaS (Supabase).
 - **Testes:** PHPUnit / Pest.
 - **API:** Padrão RESTful, estritamente versionada (ex: `/api/v1`), e com respostas unificadas em JSON.
 
 ## 2. Paradigma Arquitetural Obrigatório
 
-> ⚠️ **LEITURA OBRIGATÓRIA:** Antes de criar, sugerir ou corrigir qualquer fluxo de código envolvendo Controller, Service, Repository ou DTO, leia o arquivo **`skill-layers.md`** e respeite estritamente o fluxo canônico e os antipadrões documentados ali.
+> ⚠️ **LEITURA OBRIGATÓRIA:** Antes de criar, sugerir ou corrigir qualquer fluxo de código envolvendo Controller, Service, Repository ou DTO, leia o arquivo **`Skills/dev/skill-layers.md`** e respeite estritamente o fluxo canônico e os antipadrões documentados ali.
 
 A separação de responsabilidades (SoC) é uma exigência inegociável (Controllers Finos, Services, Repositories, DTOs e Form Requests).
 Detalhes minuciosos de implementação dessas camadas não vivem neste arquivo.

@@ -163,21 +163,17 @@ node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor --print
 
 ## 5. Templates versionados
 
-Use os arquivos abaixo como fonte ao adicionar novos agentes:
+Templates estao divididos em dois arquivos por razoes de seguranca:
 
-- `mcp-config/mcp.base.template.json`
-- `mcp-config/agents/claude-code.template.json`
+- **`mcp-config/mcp.brain-only.template.json`** — APENAS o bloco do Brain. Seguro para versionar e copiar livremente.
+- **`mcp-config/mcp.external.template.json`** — MCPs externos (Stitch, Notion, Supabase, Postman). Contem placeholders de chaves. **Copiar para fora do repo antes de preencher chaves reais.**
+
+Templates por agente (apenas o bloco do Brain, ja formatado para o agente):
+
 - `mcp-config/agents/claude-desktop.template.json`
 - `mcp-config/agents/cursor.template.json`
 - `mcp-config/agents/cline-roo.template.json`
 - `mcp-config/agents/antigravity.template.json`
-
-O template base tambem documenta MCPs externos com placeholders:
-
-- `StitchMCP`
-- `notion-mcp-server`
-- `supabase`
-- `postman-mcp-server`
 
 Credenciais reais nunca devem ser gravadas no repositorio. Elas pertencem ao arquivo local da IDE/agente ou a um cofre de senhas.
 
@@ -190,6 +186,6 @@ Depois da configuracao, o agente deve confirmar:
 - `BRAIN_ROOT` usado.
 - Arquivo MCP atualizado ou JSON entregue para configuracao manual.
 - Pastas lidas: `Skills`, `Docks`, `ADRs`, `Workflows`, `Plans` (quando existirem).
-- Skills encontradas por `list_skills`.
-- Ferramentas disponiveis: `brain_status`, `list_skills`, `read_file`, `search_brain`.
+- Skills encontradas no `brain_status` (lista por pasta).
+- Ferramentas disponiveis: `brain_status`, `read_file`, `read_section`, `search_brain`.
 - Resultado final: sucesso, sucesso aguardando reinicio, ou erro com proximo passo.

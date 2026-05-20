@@ -1,0 +1,104 @@
+# Template CLAUDE.md — copiar para a raiz de cada projeto
+
+> Substitua tudo dentro de `{{ ... }}` pelos valores reais do projeto.
+> Apague seções que não se aplicam à stack do projeto.
+> Mantenha o arquivo curto (~40-60 linhas). Detalhe vive no Brain, não aqui.
+
+```markdown
+# Projeto: {{NOME_DO_PROJETO}}
+
+**Stack:** {{ex: Laravel 11, PHP 8.2+, MariaDB, Redis, Docker, Vanilla JS, Blade}}
+**Tipo:** {{ex: API REST + frontend Blade / SPA / Microservice / CLI}}
+**Status:** {{ex: MVP em desenvolvimento / Produção / Legado}}
+
+---
+
+## Obsidian Brain (memória técnica externa)
+
+Este projeto consulta o Brain global para padrões arquiteturais reutilizáveis.
+
+- **Caminho local do Brain:** `C:\Users\lukas\git_projetos\Outros\Obsidian-ld\Obsidian-LD`
+- **MCP server:** `obsidian-brain-mcp` v1.1 (tools: `brain_status`, `read_file`, `read_section`, `search_brain`)
+- **Como usar:** prefira `read_section` quando souber a skill **e a seção**; `read_file` quando precisar do arquivo inteiro; `search_brain` só para descoberta; `brain_status` só na 1ª conversa em máquina nova.
+
+### Quando consultar o Brain (regra mecânica)
+
+| Tarefa                                                  | Skill primária                       |
+|---------------------------------------------------------|--------------------------------------|
+| Criar/refatorar fluxo backend (Controller→Service→Repo) | `Skills/dev/skill-layers.md`         |
+| Revisão de segurança / discordância ativa               | `Skills/dev/skill-secur.md`          |
+| Escrever testes (Pest)                                  | `Skills/dev/skill-qa.md`             |
+| Tela/UI nova (Blade + CSS + JS isolados)                | `Skills/dev/skill-front.md`          |
+| Setup Docker, deploy, CI/CD                             | `Skills/dev/skill-infra.md`          |
+| Documentar API (Swagger/OpenAPI)                        | `Skills/dev/skill-swagger-docs.md`   |
+| Tarefa complexa (>3 arquivos, planejar antes de codar)  | `Skills/ops/skill-planner.md`        |
+| Decisão arquitetural durável                            | `Skills/ops/skill-memory.md` (criar ADR) |
+
+### Quando NÃO consultar o Brain
+
+- Rename de variável/função
+- Fix de typo / formatação
+- Comando rápido (ex: "rode os testes", "abra o arquivo X")
+- Pergunta puramente informativa sobre o código existente
+- Qualquer tarefa mecânica que não envolva decisão arquitetural
+
+---
+
+## Padrões inegociáveis deste projeto
+
+{{ Listar 3-6 regras-âncora curtas. Exemplo abaixo. }}
+
+- Fluxo canônico: `FormRequest → CommandDTO → Service → Repository → ResponseDTO`. Detalhe em `Skills/dev/skill-layers.md`.
+- Nunca passar `$request` cru ao Service — sempre `$request->validated()`.
+- Service nunca retorna Eloquent Model — sempre `ResponseDTO::fromModel()`.
+- Repository é o único que faz query.
+- Código em **inglês**; comentários e explicações em **PT-BR**.
+- Sem PHPDoc descritivo em métodos internos.
+
+---
+
+## Comandos úteis do projeto
+
+```bash
+{{ # Backend
+php artisan serve
+php artisan migrate:fresh --seed
+./vendor/bin/pest
+
+# Frontend
+npm run dev
+npm run build
+
+# Docker
+docker compose up -d
+docker compose logs -f app }}
+```
+
+---
+
+## Notas específicas deste projeto
+
+{{ Coisas que NÃO estão no Brain porque são únicas deste projeto:
+- Quirks de domínio (regras de negócio peculiares)
+- Decisões de integração com APIs externas
+- Workarounds temporários documentados
+- Limitações conhecidas que afetam código (ex: "tabela X é legado, não tocar") }}
+```
+
+---
+
+## Como adaptar este template a um projeto novo
+
+1. Copie o bloco entre as ``` ```markdown ... ``` ``` acima para a raiz do projeto como `CLAUDE.md`.
+2. Substitua `{{NOME_DO_PROJETO}}` e demais placeholders.
+3. Apague linhas da tabela "Quando consultar o Brain" que não se aplicam (ex: projeto sem frontend → apaga linha do `skill-front`).
+4. Apague linhas dos padrões inegociáveis que não fazem sentido na stack (ex: projeto Python → apaga refs a `array_filter`, PHPDoc, Eloquent).
+5. Adicione no bloco "Notas específicas" qualquer regra que **vale só nesse projeto** — coisas que não devem virar skill global.
+6. Commit no repositório do projeto (não no Brain).
+
+### Regras para manter o `CLAUDE.md` saudável
+
+- **Tamanho:** máximo ~60 linhas. Se crescer, mova o excesso para o Brain.
+- **Não duplicar conteúdo do Brain.** Apenas referenciar pelo path relativo.
+- **Atualizar quando a stack muda.** Se trocar Redis por Memcached, atualizar aqui.
+- **Não colocar segredos.** Nada de URLs com token, chaves API, etc.

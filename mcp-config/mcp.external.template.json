@@ -1,14 +1,7 @@
 {
+  "_warning": "NUNCA preencher chaves reais neste arquivo enquanto ele estiver dentro do repositorio. Copie este template para FORA do repo (ou para o arquivo local da IDE em %USERPROFILE%\\.claude, %APPDATA%\\Code\\User, etc.) ANTES de substituir os placeholders <SUA_CHAVE_*>.",
+  "_uso": "MCPs externos opcionais. Use junto com mcp.brain-only.template.json no mesmo arquivo final da sua IDE (mesclando os blocos dentro de mcpServers).",
   "mcpServers": {
-    "obsidian-brain-mcp": {
-      "command": "node",
-      "args": [
-        "<BRAIN_ROOT>/mcp-server/index.js"
-      ],
-      "env": {
-        "OBSIDIAN_BRAIN_ROOT": "<BRAIN_ROOT>"
-      }
-    },
     "StitchMCP": {
       "command": "npx",
       "args": [
@@ -16,7 +9,7 @@
         "mcp-remote",
         "https://stitch.googleapis.com/mcp",
         "--header",
-        "X-Goog-Api-Key: <SEU_GOOGLE_API_KEY_AQUI>"
+        "X-Goog-Api-Key: <SUA_GOOGLE_API_KEY_AQUI>"
       ],
       "env": {}
     },
@@ -27,7 +20,7 @@
         "@notionhq/notion-mcp-server"
       ],
       "env": {
-        "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer <SUA_CHAVE_DO_NOTION_AQUI>\", \"Notion-Version\": \"2022-06-28\"}"
+        "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer <SUA_CHAVE_NOTION_AQUI>\", \"Notion-Version\": \"2022-06-28\"}"
       }
     },
     "supabase": {

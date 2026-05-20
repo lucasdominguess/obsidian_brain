@@ -107,9 +107,9 @@ Depois entregue o JSON para o usuario colar manualmente.
 
 Depois que a IDE/agente carregar o MCP, valide:
 
-1. Execute `brain_status`.
-2. Execute `list_skills`.
-3. Execute `read_file` em `Skills/skill-planner.md`.
+1. Execute `brain_status` (retorna o inventario completo de arquivos por pasta).
+2. Execute `read_file` em `Skills/ops/skill-planner.md`.
+3. Execute `read_section` em `Skills/dev/skill-layers.md` com `headingName: "Antipadrões"`.
 4. Execute `search_brain` buscando por `MCP`.
 
 Se o MCP so ficar disponivel apos reinicio, avise o usuario para reiniciar a IDE/agente e repetir a validacao.
@@ -122,7 +122,7 @@ Ao final, responda com:
 - Caminho do arquivo MCP alterado, ou informe que o modo manual foi necessario.
 - Pastas acessiveis: `Skills`, `Docks`, `ADRs`, `Workflows`, `Plans`, quando existirem.
 - Skills encontradas.
-- Ferramentas MCP disponiveis: `brain_status`, `list_skills`, `read_file`, `search_brain`.
+- Ferramentas MCP disponiveis: `brain_status`, `read_file`, `read_section`, `search_brain`.
 - Status final: sucesso, sucesso aguardando reinicio, ou erro com o proximo passo exato.
 
 ## Seguranca

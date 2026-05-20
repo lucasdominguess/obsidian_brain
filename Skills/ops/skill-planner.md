@@ -12,7 +12,7 @@ Nesta fase, nao gere implementacao final. O entregavel e um arquivo de planejame
 
 Como Planner, voce tem permissao para usar ferramentas de leitura, MCP e busca local para analisar os arquivos do projeto e do Obsidian Brain.
 
-- Use `search_brain`, `list_skills`, `read_file` e `brain_status` quando o MCP estiver disponivel.
+- Use `search_brain`, `read_file`, `read_section` e `brain_status` quando o MCP estiver disponivel.
 - Se o MCP ainda nao estiver configurado, use o `BRAIN_ROOT` informado no bootstrap para ler os arquivos do Brain.
 - Nao dependa de symlink `.brain`; esse caminho e legado.
 

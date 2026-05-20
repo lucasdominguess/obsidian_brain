@@ -30,10 +30,10 @@ O conteudo real (Skills, Docks, Plans, ADRs, Workflows) e o codigo do servidor (
 
 ## Ferramentas MCP expostas
 
-- `brain_status` — diagnostico do Brain
-- `list_skills` — lista as skills disponiveis em `Skills/`
-- `read_file` — le um arquivo relativo ao `BRAIN_ROOT`
-- `search_brain` — busca textual no conteudo do Brain
+- `brain_status` — diagnostico + inventario completo de arquivos por pasta
+- `read_file` — le um arquivo inteiro relativo ao `BRAIN_ROOT`
+- `read_section` — le apenas uma secao (heading `##`/`###`) de um arquivo (economia de tokens)
+- `search_brain` — busca textual com `regex`/`caseSensitive` opcionais e cap por arquivo
 
 ## Como reempacotar o plugin
 
