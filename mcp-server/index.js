@@ -13,17 +13,26 @@ const BRAIN_ROOT = configuredBrainRoot
     : path.resolve(__dirname, "../");
 
 const KNOWLEDGE_DIRS = ["Skills", "Docks", "ADRs", "Workflows", "Plans"];
-const TOOL_NAMES = ["brain_status", "list_skills", "read_file", "search_brain"];
+const TOOL_NAMES = ["brain_status", "read_file", "read_section", "search_brain"];
 
-// Create the MCP Server
+const fileCache = new Map();
+
 const server = new McpServer({
     name: "obsidian-brain-mcp",
-    version: "1.0.0"
+    version: "1.1.0"
 });
 
-/**
- * Helper: Recursively find markdown files in a directory
- */
+async function readFileCached(filePath) {
+    const stat = await fs.stat(filePath);
+    const cached = fileCache.get(filePath);
+    if (cached && cached.mtimeMs === stat.mtimeMs) {
+        return cached.content;
+    }
+    const content = await fs.readFile(filePath, "utf-8");
+    fileCache.set(filePath, { mtimeMs: stat.mtimeMs, content });
+    return content;
+}
+
 async function findMarkdownFiles(dir) {
     let results = [];
     try {
@@ -52,7 +61,6 @@ async function collectBrainFiles() {
             return { dirName, dirPath, files };
         })
     );
-
     return groups;
 }
 
@@ -66,142 +74,163 @@ function resolveBrainPath(filePath) {
     return { fullPath, isInsideRoot };
 }
 
-// Tool: brain_status
+// Tool: brain_status — inventário completo (substitui list_skills)
 server.tool(
     "brain_status",
-    "Show the active Obsidian Brain root, indexed folders, available tools, and readable Markdown files.",
+    "Show the active Obsidian Brain root, indexed folders, available tools, and the full list of readable Markdown files (grouped by folder).",
     {},
     async () => {
         const groups = await collectBrainFiles();
         const lines = [
             `Brain root: ${BRAIN_ROOT}`,
-            `Root source: ${configuredBrainRoot ? "OBSIDIAN_BRAIN_ROOT" : "mcp-server relative fallback"}`,
+            `Root source: ${configuredBrainRoot ? "OBSIDIAN_BRAIN_ROOT env" : "mcp-server relative fallback"}`,
             `Available tools: ${TOOL_NAMES.join(", ")}`,
             "",
             "Indexed folders:"
         ];
-
         for (const group of groups) {
             lines.push(`- ${group.dirName}: ${group.files.length} markdown file(s)`);
         }
-
-        lines.push("", "Readable files:");
-        const files = groups.flatMap((group) => group.files.map(formatBrainPath));
-        lines.push(files.length ? files.join("\n") : "No Markdown files found.");
-
-        return {
-            content: [{ type: "text", text: lines.join("\n") }]
-        };
+        lines.push("", "Readable files (relative paths):");
+        for (const group of groups) {
+            if (group.files.length === 0) continue;
+            lines.push(`\n# ${group.dirName}`);
+            for (const f of group.files) {
+                lines.push(`  ${formatBrainPath(f)}`);
+            }
+        }
+        return { content: [{ type: "text", text: lines.join("\n") }] };
     }
 );
 
-// Tool: list_skills
-server.tool(
-    "list_skills",
-    "List all available skills and documents in the Obsidian Brain",
-    {},
-    async () => {
-        const groups = await collectBrainFiles();
-        const items = groups.flatMap((group) => group.files.map(formatBrainPath));
-
-        return {
-            content: [{ type: "text", text: `Available Brain files:\n${items.join("\n")}` }]
-        };
-    }
-);
-
-// Tool: read_file
+// Tool: read_file — leitura completa de um arquivo
 server.tool(
     "read_file",
-    "Read the content of a specific file from the Obsidian Brain (e.g., 'Skills/skill-front.md').",
+    "Read the full content of a specific file from the Obsidian Brain (e.g., 'Skills/dev/skill-layers.md').",
     {
-        filePath: z.string().describe("Relative path to the file (e.g., Skills/skill-front.md)")
+        filePath: z.string().describe("Relative path to the file (e.g., Skills/dev/skill-layers.md)")
     },
     async ({ filePath }) => {
         try {
             const { fullPath, isInsideRoot } = resolveBrainPath(filePath);
             if (!isInsideRoot) {
-                return {
-                    content: [{ type: "text", text: "Error: Invalid path. Access denied." }],
-                    isError: true
-                };
+                return { content: [{ type: "text", text: "Error: Invalid path. Access denied." }], isError: true };
             }
-
-            const content = await fs.readFile(fullPath, "utf-8");
-            return {
-                content: [{ type: "text", text: content }]
-            };
+            const content = await readFileCached(fullPath);
+            return { content: [{ type: "text", text: content }] };
         } catch (error) {
-            return {
-                content: [{ type: "text", text: `Error reading file: ${error.message}` }],
-                isError: true
-            };
+            return { content: [{ type: "text", text: `Error reading file: ${error.message}` }], isError: true };
         }
     }
 );
 
-// Tool: search_brain
+// Tool: read_section — leitura parcial (por heading ## ou ###)
+server.tool(
+    "read_section",
+    "Read only one section of a Markdown file, delimited by a heading (## or ###). Saves tokens vs reading the full file. Heading match is case-insensitive substring.",
+    {
+        filePath: z.string().describe("Relative path to the file (e.g., Skills/dev/skill-layers.md)"),
+        headingName: z.string().describe("Heading text to locate, without the leading ## or ### prefix. Case-insensitive substring match.")
+    },
+    async ({ filePath, headingName }) => {
+        try {
+            const { fullPath, isInsideRoot } = resolveBrainPath(filePath);
+            if (!isInsideRoot) {
+                return { content: [{ type: "text", text: "Error: Invalid path. Access denied." }], isError: true };
+            }
+            const content = await readFileCached(fullPath);
+            const lines = content.split("\n");
+            const needle = headingName.toLowerCase();
+            let startIdx = -1;
+            let startLevel = 0;
+            for (let i = 0; i < lines.length; i++) {
+                const m = lines[i].match(/^(#{2,6})\s+(.*)$/);
+                if (m && m[2].toLowerCase().includes(needle)) {
+                    startIdx = i;
+                    startLevel = m[1].length;
+                    break;
+                }
+            }
+            if (startIdx === -1) {
+                return { content: [{ type: "text", text: `Section matching "${headingName}" not found in ${filePath}.` }], isError: true };
+            }
+            let endIdx = lines.length;
+            for (let i = startIdx + 1; i < lines.length; i++) {
+                const m = lines[i].match(/^(#{1,6})\s+/);
+                if (m && m[1].length <= startLevel) {
+                    endIdx = i;
+                    break;
+                }
+            }
+            const section = lines.slice(startIdx, endIdx).join("\n");
+            return { content: [{ type: "text", text: section }] };
+        } catch (error) {
+            return { content: [{ type: "text", text: `Error reading section: ${error.message}` }], isError: true };
+        }
+    }
+);
+
+// Tool: search_brain — grep with optional regex / case sensitivity / per-file cap
 server.tool(
     "search_brain",
-    "Search for a keyword or phrase across all Markdown files in the Obsidian Brain. Returns excerpts.",
+    "Search across all Markdown files in the Obsidian Brain. Defaults to case-insensitive substring; pass regex=true for full regex or caseSensitive=true to enforce case. Returns ranked excerpts capped per file.",
     {
-        query: z.string().describe("Keyword or phrase to search for")
+        query: z.string().describe("Search term (substring by default, regex if regex=true)"),
+        regex: z.boolean().optional().default(false).describe("Treat query as a JavaScript regex pattern"),
+        caseSensitive: z.boolean().optional().default(false).describe("Enforce case sensitivity"),
+        maxPerFile: z.number().int().positive().optional().default(3).describe("Maximum matches reported per file (default 3)")
     },
-    async ({ query }) => {
+    async ({ query, regex, caseSensitive, maxPerFile }) => {
         try {
             const groups = await collectBrainFiles();
-            const allFiles = groups.flatMap((group) => group.files);
+            const allFiles = groups.flatMap((g) => g.files);
 
-            const lowerQuery = query.toLowerCase();
-            let results = [];
+            let matcher;
+            if (regex) {
+                try {
+                    matcher = new RegExp(query, caseSensitive ? "" : "i");
+                } catch (e) {
+                    return { content: [{ type: "text", text: `Invalid regex: ${e.message}` }], isError: true };
+                }
+            } else {
+                const needle = caseSensitive ? query : query.toLowerCase();
+                matcher = {
+                    test: (line) => (caseSensitive ? line : line.toLowerCase()).includes(needle)
+                };
+            }
 
+            const results = [];
             for (const file of allFiles) {
-                const content = await fs.readFile(file, "utf-8");
+                const content = await readFileCached(file);
                 const lines = content.split("\n");
-                let matchFound = false;
-                let excerpts = [];
-
-                for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].toLowerCase().includes(lowerQuery)) {
-                        matchFound = true;
-                        // Get excerpt (2 lines before, 2 lines after)
-                        const start = Math.max(0, i - 2);
-                        const end = Math.min(lines.length - 1, i + 2);
+                const excerpts = [];
+                for (let i = 0; i < lines.length && excerpts.length < maxPerFile; i++) {
+                    if (matcher.test(lines[i])) {
+                        const start = Math.max(0, i - 1);
+                        const end = Math.min(lines.length - 1, i + 1);
                         const block = lines.slice(start, end + 1).join("\n");
                         excerpts.push(`--- Line ${i + 1} ---\n${block}`);
                     }
                 }
-
-                if (matchFound) {
-                    const relPath = formatBrainPath(file);
-                    results.push(`### File: ${relPath}\n${excerpts.join("\n\n")}`);
+                if (excerpts.length > 0) {
+                    results.push(`### File: ${formatBrainPath(file)}\n${excerpts.join("\n\n")}`);
                 }
             }
 
             if (results.length === 0) {
-                return {
-                    content: [{ type: "text", text: `No results found for "${query}"` }]
-                };
+                return { content: [{ type: "text", text: `No results found for "${query}"` }] };
             }
-
-            return {
-                content: [{ type: "text", text: `Search results for "${query}":\n\n${results.join("\n\n====================\n\n")}` }]
-            };
-
+            return { content: [{ type: "text", text: `Search results for "${query}" (regex=${regex}, caseSensitive=${caseSensitive}):\n\n${results.join("\n\n====================\n\n")}` }] };
         } catch (error) {
-            return {
-                content: [{ type: "text", text: `Error searching brain: ${error.message}` }],
-                isError: true
-            };
+            return { content: [{ type: "text", text: `Error searching brain: ${error.message}` }], isError: true };
         }
     }
 );
 
-// Start the server
 async function startServer() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error("Obsidian Brain MCP Server is running on stdio");
+    console.error("Obsidian Brain MCP Server v1.1.0 running on stdio");
 }
 
 startServer().catch(console.error);

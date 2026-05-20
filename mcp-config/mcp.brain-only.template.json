@@ -1,0 +1,14 @@
+{
+  "_comment": "Template seguro para versionar. Apenas o MCP do Brain, sem chaves. Substitua <BRAIN_ROOT> pelo caminho absoluto da pasta clonada deste repositorio.",
+  "mcpServers": {
+    "obsidian-brain-mcp": {
+      "command": "node",
+      "args": [
+        "<BRAIN_ROOT>/mcp-server/index.js"
+      ],
+      "env": {
+        "OBSIDIAN_BRAIN_ROOT": "<BRAIN_ROOT>"
+      }
+    }
+  }
+}

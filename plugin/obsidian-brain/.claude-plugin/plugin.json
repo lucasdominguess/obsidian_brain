@@ -1,0 +1,14 @@
+{
+  "name": "obsidian-brain",
+  "version": "0.1.0",
+  "description": "Registra o servidor MCP local que da acesso ao Obsidian Brain (Skills, Docks, Plans, ADRs, Workflows) clonado no filesystem do usuario.",
+  "author": {
+    "name": "lucas"
+  },
+  "keywords": [
+    "obsidian",
+    "brain",
+    "mcp",
+    "knowledge-base"
+  ]
+}

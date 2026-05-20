@@ -1,160 +1,176 @@
-# Obsidian Brain - Base global para agentes de IA
+# Obsidian Brain — base global de conhecimento para agentes de IA
 
-Este repositorio e a base central de conhecimento usada pelo Obsidian e pelos agentes de IA. Ele guarda skills, documentos de apoio, decisoes tecnicas e a configuracao do MCP local que permite ao agente consultar o Brain sem depender do projeto aberto.
+Repositorio central usado pelo Obsidian e pelos agentes de IA. Guarda skills versionadas, documentos de apoio, decisoes tecnicas e a configuracao do MCP local que da acesso ao Brain a partir de qualquer projeto.
 
-O objetivo atual e simples: abrir qualquer IDE ou agente, em qualquer projeto, e o agente conseguir encontrar este Brain pelo caminho absoluto do clone e pelo servidor MCP global.
+**Objetivo:** abrir qualquer IDE/agente em qualquer projeto e o agente conseguir consultar o Brain pelo caminho absoluto do clone + servidor MCP global.
 
-## Arquitetura atual
+---
 
-O fluxo principal agora e:
+## Arquitetura
 
-1. O repositorio e clonado em qualquer pasta da maquina.
-2. O usuario informa uma vez o caminho absoluto dessa pasta, chamado `BRAIN_ROOT`.
-3. A IDE/agente registra o MCP global `obsidian-brain-mcp`.
-4. O MCP aponta diretamente para `<BRAIN_ROOT>/mcp-server/index.js`.
-5. O agente consulta `Skills`, `Docks`, `ADRs`, `Workflows` e `Plans` usando as ferramentas MCP.
+1. Repositorio clonado em qualquer pasta da maquina.
+2. Usuario informa uma vez o caminho absoluto da pasta — o `BRAIN_ROOT`.
+3. Variavel de ambiente `OBSIDIAN_BRAIN_ROOT` aponta para esse caminho.
+4. IDE/agente registra o MCP global `obsidian-brain-mcp` no `settings.json` local.
+5. Agente consulta `Skills/`, `Docks/`, `ADRs/`, `Workflows/` e `Plans/` usando 4 tools: `brain_status`, `read_file`, `read_section`, `search_brain`.
 
-O antigo symlink `.brain` continua podendo existir em projetos antigos, mas virou fluxo legado/opcional. Ele nao e mais necessario para SISDTIC, SGOPM ou qualquer outro projeto novo.
+---
 
-## Setup do zero
+## Caminho mais simples — Claude Code CLI
 
-### 1. Clone o repositorio
+A maioria dos agentes le um JSON `mcpServers`. Para o Claude Code CLI:
 
-Clone este repositorio em qualquer pasta. Guarde o caminho absoluto da pasta clonada.
-
-Exemplo:
-
-```text
-C:\Users\lukas\git_projetos\Outros\Obsidian-ld\Obsidian-LD
-```
-
-Neste guia, esse caminho sera chamado de `BRAIN_ROOT`.
-
-### 2. Instale as dependencias do MCP local
-
-Abra um terminal em:
-
-```text
-<BRAIN_ROOT>\mcp-server
-```
-
-Execute:
+### Passo 1 — clonar e setar `OBSIDIAN_BRAIN_ROOT`
 
 ```bash
+git clone <URL_DO_REPO_BRAIN> C:\caminho\Obsidian-LD
+```
+
+**Windows (PowerShell, persistente):**
+```powershell
+[System.Environment]::SetEnvironmentVariable("OBSIDIAN_BRAIN_ROOT", "C:\caminho\Obsidian-LD", "User")
+```
+Feche e reabra o terminal/IDE para a variavel ser herdada.
+
+**Linux/macOS:** adicione `export OBSIDIAN_BRAIN_ROOT="/home/usuario/obsidian-brain"` ao `~/.bashrc` ou `~/.zshrc` e recarregue.
+
+### Passo 2 — instalar dependencias do MCP local
+
+```bash
+cd <BRAIN_ROOT>/mcp-server
 npm install --strict-ssl=false
 ```
 
-### 3. Peca ao agente para se configurar
+### Passo 3 — registrar o MCP no `settings.json` global
 
-Na IDE/agente, cole:
-
-```text
-Meu Obsidian Brain esta em <BRAIN_ROOT>. Leia <BRAIN_ROOT>/brain-bootstrap.md e configure seu MCP global. Ao final, confirme quais pastas, skills e ferramentas voce consegue acessar.
-```
-
-Exemplo:
-
-```text
-Meu Obsidian Brain esta em C:\Users\lukas\git_projetos\Outros\Obsidian-ld\Obsidian-LD. Leia C:\Users\lukas\git_projetos\Outros\Obsidian-ld\Obsidian-LD\brain-bootstrap.md e configure seu MCP global. Ao final, confirme quais pastas, skills e ferramentas voce consegue acessar.
-```
-
-### 4. Opcional: usar o inicializador Node
-
-Se o agente puder executar comandos locais e ja existir um arquivo MCP conhecido, ele pode usar:
-
-```bash
-node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent auto
-```
-
-Para setup do zero, normalmente e melhor escolher o agente explicitamente:
-
-```bash
-node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent antigravity
-node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent claude-desktop
-node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cline-roo
-node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor
-```
-
-Para apenas gerar o JSON sem gravar:
-
-```bash
-node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor --print
-```
-
-## Setup manual
-
-Se a IDE/agente nao puder editar arquivos fora do projeto atual, copie o bloco de `mcp-config/mcp.base.template.json`, substitua `<BRAIN_ROOT>` pelo caminho absoluto real e cole na configuracao MCP da IDE.
-
-Templates disponiveis:
-
-- `mcp-config/mcp.base.template.json`
-- `mcp-config/agents/antigravity.template.json`
-- `mcp-config/agents/claude-desktop.template.json`
-- `mcp-config/agents/cline-roo.template.json`
-- `mcp-config/agents/cursor.template.json`
-
-## Migracao de agente legado com symlink
-
-Use este fluxo quando o agente/IDE ja foi configurado antes pelo modelo antigo, com `.brain` dentro de cada projeto.
-
-1. Abra a configuracao MCP global da IDE/agente.
-2. Procure o servidor `obsidian-brain-mcp`.
-3. Se `args` apontar para `.brain/mcp-server/index.js` ou para uma pasta de projeto especifica, substitua por:
+Edite `%USERPROFILE%\.claude\settings.json` (Windows) ou `~/.claude/settings.json` (Linux/Mac) e mescle o bloco abaixo dentro de `mcpServers`:
 
 ```json
 {
-  "command": "node",
-  "args": [
-    "<BRAIN_ROOT>/mcp-server/index.js"
-  ],
-  "env": {
-    "OBSIDIAN_BRAIN_ROOT": "<BRAIN_ROOT>"
+  "mcpServers": {
+    "obsidian-brain-mcp": {
+      "command": "node",
+      "args": ["<BRAIN_ROOT>/mcp-server/index.js"],
+      "env": { "OBSIDIAN_BRAIN_ROOT": "<BRAIN_ROOT>" }
+    }
   }
 }
 ```
 
-4. No Antigravity, mantenha tambem:
+Substitua `<BRAIN_ROOT>` pelo caminho absoluto real. Preserve outros servidores ja registrados.
 
-```json
-"$typeName": "exa.cascade_plugins_pb.CascadePluginCommandTemplate"
+### Passo 4 — validar
+
+Abra uma conversa nova e peca: *"rode `brain_status` e me mostre o inventario completo do Brain."*
+
+Esperado: 4 ferramentas listadas (`brain_status`, `read_file`, `read_section`, `search_brain`) + arvore de arquivos por pasta (`Skills/dev/`, `Skills/ops/`, `Skills/business/`, `Docks/`, `Plans/`, etc.).
+
+---
+
+## Outros agentes
+
+| Agente | Arquivo de config | Chave |
+|---|---|---|
+| Claude Code CLI | `%USERPROFILE%\.claude\settings.json` | `mcpServers` |
+| Claude Desktop | `%APPDATA%\Claude\claude_desktop_config.json` | `mcpServers` |
+| Cursor | `%USERPROFILE%\.cursor\mcp.json` | `mcpServers` |
+| VS Code (Copilot) | `%APPDATA%\Code\User\mcp.json` | `servers` (precisa de campo `"type": "stdio"`) |
+| Cline/Roo | `%APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json` | `mcpServers` |
+| Antigravity | `%USERPROFILE%\.gemini\antigravity\mcp_config.json` | `mcpServers` + `$typeName` |
+
+Detalhes por agente em `Skills/ops/mcp-setup.md`. Templates prontos em `mcp-config/agents/`.
+
+### Inicializador opcional
+
+Se voce puder rodar Node, o script abaixo injeta o bloco MCP automaticamente com backup:
+
+```bash
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent claude-code
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent cursor
+node tools/brain-init.mjs --brain-root "<BRAIN_ROOT>" --agent antigravity
+# (use --print para inspecionar sem gravar)
 ```
 
-5. Salve o arquivo e reinicie a IDE/agente.
-6. Peca ao agente para rodar a validacao final descrita em `brain-bootstrap.md`.
+---
 
-O symlink `.brain` pode permanecer nos projetos antigos sem quebrar nada. A diferenca e que o agente deixa de depender dele para encontrar o Brain.
+## Alternativa: instalar como plugin Claude Cowork
 
-## Confirmacao obrigatoria do agente
+O **Claude Cowork** nao le `claude_desktop_config.json`. Ele tem um sistema proprio de plugins. O Brain ja inclui um plugin ponteiro pronto em `plugin/obsidian-brain/`.
 
-Ao terminar uma configuracao nova ou uma migracao legada, o agente deve responder com:
+O plugin nao empacota Skills/Docks/MCP — apenas registra o servidor MCP apontando para `${OBSIDIAN_BRAIN_ROOT}/mcp-server/index.js`. Todo o conteudo continua no clone do repositorio.
+
+### Empacotar o `.plugin`
+
+**Linux/macOS (com `zip`):**
+```bash
+cd <BRAIN_ROOT>/plugin/obsidian-brain
+zip -r obsidian-brain.plugin . -x "*.DS_Store"
+```
+
+**Windows PowerShell (sem `zip` nativo):**
+```powershell
+cd <BRAIN_ROOT>\plugin\obsidian-brain
+Compress-Archive -Path .\.claude-plugin, .\.mcp.json, .\README.md -DestinationPath ..\obsidian-brain.zip -Force
+Rename-Item ..\obsidian-brain.zip ..\obsidian-brain.plugin -Force
+```
+
+Arraste o `.plugin` para o Cowork ou: Settings → Plugins → Install plugin. Reinicie.
+
+### Quando reempacotar
+
+| Mudanca | Reempacotar? |
+| --- | --- |
+| Editar/criar `.md` em `Skills/`, `Docks/`, `Plans/`, `ADRs/`, `Workflows/` | Nao. `git pull` no `BRAIN_ROOT`. |
+| Adicionar pasta nova de conteudo | Nao. O MCP le dinamicamente. |
+| Editar `mcp-server/index.js` (adicionar/remover tool, mudar schema) | Sim. Reempacote e reinstale. |
+| Mudar dependencia em `mcp-server/package.json` | Nao reempacotar, mas rodar `npm install` no `BRAIN_ROOT/mcp-server`. |
+| Trocar de maquina | Nao reempacotar. So setar `OBSIDIAN_BRAIN_ROOT` na nova maquina. |
+
+### Sincronia entre maquinas
+
+1. Maquina A: edita skill no Obsidian, `git add` + `git push`.
+2. Maquina B: `cd <BRAIN_ROOT> && git pull`.
+3. Maquina B: proxima query MCP ja ve o conteudo atualizado. Sem reinstalar plugin, sem reiniciar.
+
+---
+
+## Confirmacao obrigatoria do agente apos setup
+
+Ao finalizar configuracao, o agente deve responder com:
 
 - `BRAIN_ROOT` usado.
-- Arquivo MCP alterado ou instrucao manual entregue.
-- Se havia configuracao legada com `.brain` e se ela foi atualizada.
-- Pastas acessiveis: `Skills`, `Docks`, `ADRs`, `Workflows`, `Plans`, quando existirem.
-- Skills detectadas, pelo menos os nomes principais retornados por `list_skills`.
-- Ferramentas MCP disponiveis: `brain_status`, `list_skills`, `read_file`, `search_brain`.
-- Status final: sucesso, sucesso aguardando reinicio da IDE/agente, ou erro com o proximo passo exato.
+- Arquivo MCP alterado (ou instrucao manual entregue).
+- Pastas acessiveis: `Skills/dev/`, `Skills/ops/`, `Skills/business/`, `Docks`, `ADRs`, `Workflows`, `Plans` quando existirem.
+- Skills detectadas pelo `brain_status` (ao menos os nomes principais por pasta).
+- Ferramentas MCP disponiveis: `brain_status`, `read_file`, `read_section`, `search_brain`.
+- Status final: sucesso / sucesso aguardando reinicio / erro com proximo passo exato.
+
+---
 
 ## Estrutura do conhecimento
 
-- `Skills/`: padroes de arquitetura, prompts sistemicos, regras de stack e operacao.
-- `Docks/`: documentacoes de apoio, guias longos e snippets.
-- `ADRs/`: decisoes arquiteturais duraveis, quando existirem.
-- `Workflows/`: checklists operacionais, quando existirem.
-- `Plans/`: blueprints gerados pelo planner local, ignorados pelo Git por padrao.
-- `mcp-server/`: servidor MCP local em Node.js.
-- `mcp-config/`: templates versionados de configuracao MCP.
-- `tools/brain-init.mjs`: inicializador opcional para atualizar JSONs MCP locais.
+- `Skills/` — padroes, regras de stack, prompts sistemicos. Subdividido em:
+  - `Skills/dev/` — engenharia (backend, frontend, qa, infra, security, swagger, supabase, layers).
+  - `Skills/ops/` — meta/processo (core, planner, memory, mentor, mcp-setup).
+  - `Skills/business/` — vertical comercial (shopee, criacao de imagem de produto).
+- `Docks/` — documentacoes de apoio, guias longos, snippets, templates.
+- `ADRs/` — decisoes arquiteturais duraveis (criadas conforme `Skills/ops/skill-memory.md`).
+- `Workflows/` — checklists operacionais.
+- `Plans/` — blueprints gerados pelo Planner local. Ignorados pelo Git por padrao.
+- `mcp-server/` — servidor MCP local em Node.js (v1.1).
+- `mcp-config/` — templates versionados:
+  - `mcp.brain-only.template.json` — apenas o Brain, seguro.
+  - `mcp.external.template.json` — MCPs externos com placeholders. **Copiar para fora do repo antes de preencher chaves.**
+  - `agents/*.template.json` — bloco do Brain ja formatado por agente.
+- `tools/brain-init.mjs` — inicializador opcional para atualizar JSONs MCP locais.
+- `plugin/obsidian-brain/` — source do plugin Cowork (arquitetura ponteiro).
+
+---
 
 ## Regras para escrever novas skills
 
-Nao grave caminhos absolutos dentro de skills, docks ou ADRs versionados. Caminhos absolutos pertencem apenas a configuracoes locais da IDE/agente.
-
-Dentro das notas, prefira caminhos relativos ao Brain:
-
-```markdown
-Busque as regras de design em `Skills/skill-front.md`.
-```
-
-O agente deve consultar o conteudo pelo MCP sempre que possivel, usando `search_brain`, `list_skills`, `read_file` e `brain_status`.
+- Nao grave caminhos absolutos em skills, docks ou ADRs versionados — pertencem apenas a configs locais da IDE/agente.
+- Use caminhos relativos ao Brain (ex: `Skills/dev/skill-front.md`).
+- Coloque a skill no namespace correto (`dev/`, `ops/`, `business/`).
+- O agente deve consultar pelo MCP sempre que possivel — `read_section` > `read_file` > `search_brain` > `brain_status` em ordem de custo de tokens.
+- Nao versionar chaves reais nem `node_modules/`.

@@ -49,10 +49,3 @@ Se eu pedir um banner de **"Modo de Uso"**, você deve gerar a Copy focada em en
 **A Copy gerada deve ter:**
 1. **Título Principal:** "Como Usar" ou "Modo de Aplicação".
 2. **Passo a Passo:** 3 a 4 passos curtos de instrução ao redor do produto (ex: "1. Aplique nas mãos", "2. Espalhe nas pontas"). Deve instruir a IA a usar setas ou ícones numerados.
-
-## 5. Ação do Consultor (O que você, IA, deve fazer)
-Quando eu fizer o pedido (ex: *"Use a skill criacao-img-produto para Principais Dores do Reparador"*), você deve:
-1. Analisar as informações do produto.
-2. Identificar a Diretiva ("Principais Dores" ou "Modo de Uso").
-3. Escrever a Copy exata focada na diretiva escolhida.
-4. Preencher o "Prompt Base" acima e me entregar o texto final pronto para ser copiado.
