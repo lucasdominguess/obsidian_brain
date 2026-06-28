@@ -113,21 +113,60 @@ Três blocos:
 
 ## 4. Fluxos principais (como tudo se conecta)
 
-```
-COMPRA cadastrada
-    ├─→ entra no ESTOQUE (+quantidade)
-    └─→ cria CONTA A PAGAR (1 ou N parcelas)
-                └─→ quando marcada como paga, vira SAÍDA no fluxo de caixa
+MÓDULO 1 — CONTAS E PERFIS
+    ├─→ Usuário
+    │       └─→ vinculado a um Perfil
+    ├─→ Perfil / Permissão
+    │       └─→ admin | operacional | financeiro
+    ├─→ Loja
+    │       └─→ entidade única no MVP, mas tabela própria
+    └─→ Marketplace
+            └─→ vinculado à Loja (Shopee, ML, etc.)
 
-VENDA cadastrada
-    ├─→ sai do ESTOQUE (-quantidade)
-    └─→ cria CONTA A RECEBER (valor líquido, data prevista)
-                └─→ quando marcada como recebida, vira ENTRADA no fluxo de caixa
+MÓDULO 2 — CADASTROS AUXILIARES
+    ├─→ Produto
+    │       └─→ Categoria de produto
+    ├─→ Fornecedor
+    ├─→ Categoria financeira  ← classifica saídas operacionais
+    └─→ Forma de pagamento    ← governa parcelamento e vencimentos
 
-DESPESA OPERACIONAL lançada manualmente
-    └─→ cria CONTA A PAGAR (categoria: operacional)
-                └─→ quando paga, vira SAÍDA no fluxo de caixa
-```
+MÓDULO 3 — COMPRA
+    ├─→ Cabeçalho (Fornecedor · data · nº nota)
+    ├─→ Itens (Produto · qtd · valor unitário)
+    └─→ Pagamento (Forma de pagamento · nº parcelas)
+            ├─→ ESTOQUE: entrada (+qtd por produto)
+            └─→ FINANCEIRO: cria Conta a Pagar (1 ou N vencimentos)
+
+MÓDULO 4 — VENDA
+    ├─→ Cabeçalho (Marketplace · data · nº pedido)
+    ├─→ Itens (Produto · qtd · valor de venda)
+    └─→ Repasse (taxas + frete · data prevista)
+            ├─→ ESTOQUE: saída (-qtd por produto)
+            └─→ FINANCEIRO: cria Conta a Receber (valor líquido · data prevista)
+
+MÓDULO 5 — ESTOQUE
+    ├─→ Saldo atual  ← view calculada, nunca número fixo
+    │       └─→ alimentado por: Compra · Venda · Ajuste manual
+    ├─→ Histórico de movimentações
+    │       ├─→ Entrada   (origem: Compra)
+    │       ├─→ Saída     (origem: Venda)
+    │       └─→ Ajuste    (origem: lançamento manual)
+    └─→ Ajuste manual
+            └─→ gera movimentação tipo "ajuste" para auditoria
+
+MÓDULO 6 — FINANCEIRO
+    ├─→ Conta a Pagar
+    │       ├─→ automática  (gerada pela Compra)
+    │       ├─→ manual      (despesa operacional: aluguel, embalagem, taxa…)
+    │       └─→ status: pendente → pago
+    │                           └─→ FLUXO DE CAIXA: vira SAÍDA real
+    ├─→ Conta a Receber
+    │       ├─→ automática  (gerada pela Venda)
+    │       └─→ status: pendente → recebido
+    │                           └─→ FLUXO DE CAIXA: vira ENTRADA real
+    └─→ Fluxo de Caixa  ← view calculada, não tabela
+            ├─→ Realizado   (contas pagas + recebidas no período)
+            └─→ Projeção    (contas pendentes dos próximos N dias)
 
 A regra de ouro: **fluxo de caixa só conta o que efetivamente foi pago/recebido.** O que está pendente vai pra projeção, não pro saldo real. Isso evita confundir "vendi" com "recebi".
 

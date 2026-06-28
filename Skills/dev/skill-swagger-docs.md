@@ -9,7 +9,13 @@ tags:
 
 # Skill: Documentacao Swagger Laravel
 
-> **Gatilho:** Use esta skill quando o usuario pedir para criar, revisar ou atualizar documentacao Swagger/OpenAPI/L5-Swagger baseada em arquivos do projeto Laravel, especialmente quando mencionar rotas, controllers, requests, DTOs, models ou a pasta `app/Docs/Swagger`.
+> **Gatilho:** Use esta skill quando o usuario pedir para criar, revisar, atualizar ou documentar endpoints Swagger/OpenAPI/L5-Swagger em um projeto Laravel. Ativado tambem por frases como "documenta a rota X", "adiciona swagger para Y", "gera a documentacao da API", "cria o Swagger de Z", ou quando mencionar controllers, requests, DTOs ou a pasta `app/Docs/Swagger`.
+
+## Quando NAO usar
+
+- O usuario quer apenas **entender** o que um endpoint faz — responda diretamente sem criar arquivos Swagger.
+- O usuario quer revisar o **codigo** de uma rota, nao a documentacao dela.
+- A tarefa e apenas corrigir um typo ou formatar um arquivo Swagger existente — faca a edicao pontual sem executar o algoritmo completo.
 
 ## 1. Objetivo
 
@@ -27,6 +33,8 @@ O resultado deve seguir o padrao ja existente do projeto, normalmente em:
 app/Docs/Swagger/<NomeDaPastaDaModel>
 ```
 
+Antes de escrever qualquer classe nova, leia 2-3 arquivos Swagger ja existentes na mesma area para capturar o estilo exato do projeto.
+
 ## 2. Leituras Obrigatorias
 
 Antes de escrever qualquer classe Swagger, leia nesta ordem:
@@ -38,9 +46,9 @@ Antes de escrever qualquer classe Swagger, leia nesta ordem:
 5. Service e Repository quando eles alteram resposta, status, filtros, paginacao, relacoes carregadas ou regras de negocio visiveis na API.
 6. Model para `fillable`, `hidden`, `casts`, relacoes e nomes reais de campos.
 7. Migration, factory e seeders quando precisar confirmar nullable, tamanho, tipo numerico, unique, indices, exemplos e valores possiveis.
-8. Documentacoes existentes em `app/Docs/Swagger` da mesma area ou area parecida.
+8. 2-3 documentacoes existentes em `app/Docs/Swagger` da mesma area para capturar o estilo exato.
 9. `app/Docs/Swagger/SwaggerConfig.php` para tags, security schemes e padrao global.
-10. `app/Helpers/ApiResponse.php` ou equivalente para envelope real de resposta.
+10. `app/Helpers/ApiResponse.php` ou equivalente (busque o arquivo se o caminho for diferente) para envelope real de resposta.
 
 Nunca documente campo, status code, relacao ou payload que nao tenha sido confirmado em algum desses arquivos.
 
@@ -70,27 +78,51 @@ Siga o estilo ja usado em `app/Docs/Swagger`:
 
 - Atributos PHP 8: `#[OA\Get(...)]`, `#[OA\Post(...)]`, `#[OA\Put(...)]`, `#[OA\Delete(...)]`.
 - `path` deve ser exatamente o path final visto em `routes/api.php`, incluindo `/api/v1`.
+- `summary` e **obrigatorio** em todo endpoint — uma linha descritiva curta (ex: `summary: 'Lista todos os produtos'`).
+- `operationId` e **obrigatorio** e deve ser unico em toda a API. Convencao: `{metodo}{Recurso}{Acao}` em camelCase. Exemplos: `listProducts`, `showProduct`, `createProduct`, `updateProduct`, `deleteProduct`.
 - `tags` devem existir em `SwaggerConfig.php`. Se a tag necessaria nao existir, atualize `SwaggerConfig.php`.
 - Use `security: [["bearerAuth" => []]]` quando a rota estiver protegida por middleware de autenticacao.
 - Documente `parameters` para query/path params.
 - Documente `requestBody` para JSON body de POST/PUT/PATCH.
-- Documente `responses` com os envelopes reais do projeto:
+- Documente `responses` com os envelopes reais do projeto.
+
+### Resposta de item unico (`ApiResponse::success`)
 
 ```json
 {
   "success": true,
   "message": "Operacao realizada com sucesso",
-  "data": {}
+  "data": { }
 }
 ```
 
-ou, em erro de validacao:
+### Resposta de lista paginada (`ApiResponse::paginated`)
+
+```json
+{
+  "success": true,
+  "message": "Listagem realizada com sucesso",
+  "data": {
+    "items": [ ],
+    "pagination": {
+      "total": 100,
+      "per_page": 15,
+      "current_page": 1,
+      "last_page": 7
+    }
+  }
+}
+```
+
+Use o schema correto conforme o tipo de retorno do Controller — item unico ou lista paginada. Nao misture os dois.
+
+### Resposta de erro de validacao (422)
 
 ```json
 {
   "success": false,
   "message": "Erro de validacao",
-  "errors": {}
+  "errors": { "campo": ["mensagem de erro"] }
 }
 ```
 
@@ -112,6 +144,21 @@ Derive diretamente do FormRequest:
 - `items` obrigatorio para arrays.
 - `minimum`, `maximum`, `minLength`, `maxLength` devem refletir regras `min`, `max`, `digits`, `size` quando fizer sentido.
 
+#### Enum — exemplo obrigatorio
+
+Quando a regra do FormRequest for `Rule::in([...])` ou `'in:val1,val2'`, documente assim:
+
+```php
+#[OA\Property(
+    property: 'status',
+    type: 'string',
+    enum: ['ativo', 'inativo', 'pendente'],
+    example: 'ativo'
+)]
+```
+
+> ⚠️ Nunca use `type: 'enum'` — nao e valido no OpenAPI 3.
+
 Use as mensagens do FormRequest como base para exemplos de erro 422.
 
 ### Response
@@ -119,7 +166,8 @@ Use as mensagens do FormRequest como base para exemplos de erro 422.
 Derive de Controller, DTO/ResponseDTO/Transformer e Model:
 
 - Se houver ResponseDTO, ele vence a Model como contrato publico.
-- Se retornar paginacao via `ApiResponse::paginated`, documente `data.items` e `data.pagination`.
+- Se retornar lista paginada via `ApiResponse::paginated`, use o schema de lista da secao 4.
+- Se retornar item unico via `ApiResponse::success($dto)`, use o schema de item unico da secao 4.
 - Respeite `hidden` da Model: campo escondido nao deve aparecer na resposta.
 - Respeite `casts`: boolean, integer, decimal, date/datetime.
 - Relacoes so devem aparecer se forem carregadas e projetadas na resposta real.
@@ -130,14 +178,18 @@ Derive de Controller, DTO/ResponseDTO/Transformer e Model:
 Antes de finalizar:
 
 - [ ] Path e metodo HTTP batem com `routes/api.php`.
+- [ ] `summary` preenchido com uma linha descritiva curta.
+- [ ] `operationId` preenchido, unico e no formato `{metodo}{Recurso}{Acao}` camelCase.
 - [ ] Classe esta no namespace correto.
 - [ ] Tag existe em `SwaggerConfig.php`.
 - [ ] Security `bearerAuth` esta presente quando a rota exige auth.
 - [ ] Todos os campos obrigatorios do FormRequest aparecem em `required`.
 - [ ] Campos nullable estao marcados como nullable.
+- [ ] Enums documentados com `enum: [...]`, nunca `type: 'enum'`.
 - [ ] Query params e path params foram documentados.
 - [ ] Request body segue o FormRequest, nao um exemplo solto do usuario.
-- [ ] Response segue Controller/DTO/ApiResponse.
+- [ ] Response usa schema de item unico ou lista paginada conforme o Controller.
+- [ ] Response segue Controller/DTO/ApiResponse — nenhum campo inventado.
 - [ ] Erros 401, 403, 404, 422 ou 500 aparecem quando o fluxo real puder gerar esses casos.
 - [ ] Exemplos usam dados coerentes com factory/seeder/migration quando disponiveis.
 - [ ] Arquivos PHP alterados passam em `php -l`.
@@ -154,5 +206,9 @@ php artisan l5-swagger:generate
 ```
 
 3. Se o comando falhar, corrija a documentacao e rode novamente.
-4. Se nao puder rodar o comando por falta de dependencia, ambiente, permissao ou sandbox, informe exatamente o motivo e o proximo passo.
-
+4. Abra o Swagger UI no browser (`/api/documentation` ou o path configurado em `config/l5-swagger.php`) e confirme visualmente:
+   - O endpoint aparece na tag correta.
+   - O `summary` esta legivel e descritivo.
+   - O schema de request e response esta correto e sem campos exibidos como `{}` ou sem tipo.
+   - Enums aparecem como dropdown no "Try it out".
+5. Se nao puder rodar o comando ou abrir o browser por falta de dependencia, ambiente, permissao ou sandbox, informe exatamente o motivo e o proximo passo.

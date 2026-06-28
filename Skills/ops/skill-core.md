@@ -35,7 +35,8 @@ tags:
 |------------------------------------------------------------|--------------------------------------------------|------------------------------------------|
 | Criar/refatorar fluxo CRUD backend (Controller→Service→Repo) | `Skills/dev/skill-layers.md`                     | `Skills/dev/skill-back.md`               |
 | Revisão de segurança / discordância ativa                  | `Skills/dev/skill-secur.md`                      | `Skills/dev/skill-back.md`               |
-| Escrever ou rodar testes Pest                              | `Skills/dev/skill-qa.md`                         | `Skills/dev/skill-layers.md`             |
+| Escrever testes por camada (Service, Repo, Controller)     | `Skills/dev/skill-unit-tests.md`                 | `Skills/dev/skill-qa.md`                 |
+| Rodar testes / TDD / filosofia de cobertura                | `Skills/dev/skill-qa.md`                         | `Skills/dev/skill-layers.md`             |
 | Tela nova (Blade + CSS + JS isolados, Dark/Light)          | `Skills/dev/skill-front.md`                      | —                                        |
 | Setup Docker / deploy / Render / CI/CD                     | `Skills/dev/skill-infra.md`                      | —                                        |
 | Documentar API (Swagger / OpenAPI / L5-Swagger)            | `Skills/dev/skill-swagger-docs.md`               | `Skills/dev/skill-layers.md`             |
