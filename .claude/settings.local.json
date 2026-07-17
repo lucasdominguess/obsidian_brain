@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"C:/Users/x492420/.claude.json\" \"C:/Users/x492420/.claude.json.bak.obsidian-brain-$\\(date +%Y%m%d-%H%M%S\\)\")",
+      "Read(//c/Users/x492420/**)",
+      "Bash(cp \"C:/Users/x492420/.claude.json.bak.obsidian-brain-20260518-103015\" \"C:/Users/x492420/.claude.json\" && echo \"restored\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\x492420"
+    ]
+  }
+}
