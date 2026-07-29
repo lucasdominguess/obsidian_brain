@@ -56,9 +56,41 @@ JSON Response
 - ❌ **Nunca** faz query ou acessa Model diretamente
 
 ### FormRequest
-- Valida e sanitiza o payload da requisição HTTP
+- Valida e **sanitiza/normaliza** o payload da requisição HTTP
+- **Toda limpeza ou tratamento de campo acontece aqui**, no `prepareForValidation()`, **antes** da validação — nunca no `CommandDTO` nem no `Service`. Detalhe na subseção _Sanitização e normalização de campos_ abaixo.
 - Usa `$request->validated()` para garantir que apenas campos declarados passem adiante
 - ❌ **Nunca** é passado diretamente para o Service ou DTO de produção (sempre passe `$request->validated()`)
+
+### Sanitização e normalização de campos
+
+**Regra:** qualquer campo que precise de limpeza ou tratamento — CPF, CNPJ, telefone, datas, nomes, e-mail, etc. — é normalizado na **FormRequest**, dentro de `prepareForValidation()`, **antes** da validação. **Nunca** no `CommandDTO`, nunca no `Service`.
+
+**Por quê antes da validação:** regras como `unique`/`exists` precisam rodar sobre o valor **canônico** (o mesmo formato gravado no banco). Se a limpeza acontecer depois (no DTO/Service), a validação enxerga o valor formatado e regras de unicidade falham silenciosamente — ex.: `unique:users,cpf` não encontra `12345678900` ao comparar com `123.456.789-00` e deixa passar um duplicado.
+
+**Onde mora a função:** em uma **trait** dedicada em `app/Traits/` (namespace `App\Traits`). A FormRequest faz `use` da trait e chama o método — a lógica **nunca** fica dentro do DTO. Reaproveite a trait existente `App\Traits\NormalizesInput` (`normalizeCpf`, `normalizeEmail`, `normalizeInputNumber`, …). **Se não existir função adequada para o campo, crie-a como método na trait** (convenção: `normalize<Campo>()`), jamais no DTO.
+
+```php
+class StoreUserRequest extends FormRequest
+{
+    use NormalizesInput;
+
+    protected function prepareForValidation(): void
+    {
+        // normaliza ANTES de validar → unique/exists rodam sobre o valor canônico
+        $this->merge([
+            'cpf'   => $this->normalizeCpf($this->input('cpf')),
+            'email' => $this->normalizeEmail($this->input('email')),
+        ]);
+    }
+
+    public function rules(): array
+    {
+        return ['cpf' => ['required', 'digits:11', 'unique:users,cpf']];
+    }
+}
+```
+
+Depois disso, `$request->validated()` → `CommandDTO::fromRequest()` → Service → Repository recebem o dado já limpo por construção. O DTO permanece um envelope puro, sem conhecer sanitização.
 
 ### CommandDTO (ex: `InventoryDTO`)
 - Representa a **intenção do usuário** de modificar o sistema
@@ -105,6 +137,7 @@ JSON Response
 | `Service` retorna `Eloquent Model` | Vaza estrutura interna | Retornar `ResponseDTO::fromModel()` |
 | `store()` retorna Model cru sem relações | Frontend recebe resposta incompleta | `create()` no Repository deve chamar `->load()` antes de retornar |
 | Passar `$request` diretamente ao `Service` | Acopla HTTP ao domínio | Passar `$request->validated()` |
+| Sanitizar/normalizar campo dentro do `CommandDTO` ou do `Service` | Validação roda sobre valor não-canônico (quebra `unique`/`exists`); polui a camada errada | Fazer no `FormRequest::prepareForValidation()` via trait de `App\Traits` |
 | `array_filter` no `toArray()` do ResponseDTO | Campos nullable desaparecem na resposta | Só usar `array_filter` no **CommandDTO** |
 | Lógica de negócio no `Controller` | Viola SRP, impossibilita testes unitários | Mover para `Service` |
 | Query direta no `Service` | Viola SRP, rompe testabilidade | Delegar ao `Repository` |
@@ -161,6 +194,7 @@ public function hasInventoryByContractId(int $contractId): bool { ... }
 ## 6. Checklist para Criar um Novo Recurso
 
 - [ ] `FormRequest` criado com todas as validações
+- [ ] Campos que exigem tratamento (CPF/CNPJ/telefone/data/nome/e-mail…) normalizados no `FormRequest::prepareForValidation()` via trait de `app/Traits/` — nunca no DTO
 - [ ] `CommandDTO` com `fromRequest()` e `toArray()` (com `array_filter`)
 - [ ] `ResponseDTO` com `fromModel()` e `toArray()` (sem filtrar nulos)
 - [ ] `Repository` com `create()`, `findById()`, `update()`, `delete()` e `withRelations()` privado
