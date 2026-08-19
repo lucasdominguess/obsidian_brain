@@ -206,9 +206,8 @@ php artisan l5-swagger:generate
 ```
 
 3. Se o comando falhar, corrija a documentacao e rode novamente.
-4. Abra o Swagger UI no browser (`/api/documentation` ou o path configurado em `config/l5-swagger.php`) e confirme visualmente:
-   - O endpoint aparece na tag correta.
-   - O `summary` esta legivel e descritivo.
-   - O schema de request e response esta correto e sem campos exibidos como `{}` ou sem tipo.
-   - Enums aparecem como dropdown no "Try it out".
-5. Se nao puder rodar o comando ou abrir o browser por falta de dependencia, ambiente, permissao ou sandbox, informe exatamente o motivo e o proximo passo.
+4. O `l5-swagger:generate` concluir sem erros e o **ultimo passo** da skill. Nao suba servidor
+   (`php artisan serve`) nem abra o Swagger UI no browser para conferencia visual — a validacao
+   do contrato e feita na leitura dos arquivos reais (secao 2) e no proprio generate.
+5. Se nao puder rodar o comando por falta de dependencia, ambiente ou permissao, informe
+   exatamente o motivo e o proximo passo.
